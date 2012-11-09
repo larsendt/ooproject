@@ -5,7 +5,7 @@ class ChunkGenerator(object):
         self.size = size
         self.dimensions = dimensions
 
-    def generateChunk(self, x, y):
+    def generate_chunk(self, x, y):
         p = perlin.SimplexNoise()
 
         # generate the initial heightmap
