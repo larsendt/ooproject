@@ -1,0 +1,2 @@
+class TerrainCache(object):
+    pass
