@@ -3,8 +3,8 @@ import terrain
 import packets
 
 class TerrainHandler(asyncore.dispatcher_with_send):
-    def __init__(self, arg):
-        asyncore.dispatcher_with_send.__init__(self, arg)
+    def __init__(self, socket):
+        asyncore.dispatcher_with_send.__init__(self, socket)
         self.terrain = terrain.Terrain(100, 2)
 
     def handle_read(self):

@@ -16,7 +16,6 @@ class Chunk(object):
 
         self.serialized_data = struct.pack("!%sf" % len(tmp_serial), *tmp_serial)
 
-
     def serial_vertex_data(self):
         """Return the serialized, network-ready data
         Format: [vx,vy,vz,nx,ny,nz,...]
