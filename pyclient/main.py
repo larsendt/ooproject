@@ -15,6 +15,33 @@ import socket
 import vertex_buffer
 import display_list
 
+def get_chunk_data(x, y):
+        host = "larsendt.com"
+        port = 5000
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.connect((host, port))
+        s.sendall("%d,%d" % (x, y))
+
+        sstring = s.recv(4)
+        size = struct.unpack(">L", sstring)[0]
+        print "expecting: %d bytes" % size
+
+        data = ""
+        while 1:
+            tmp = s.recv(16384)
+            if not tmp: break
+            data += tmp
+            ratio = len(data) / float(size)
+            print "%.2f%%" % (ratio*100)
+            if len(data) >= size: break
+
+        print "final length:", len(data)
+        print "expected size:", size
+        s.close()
+
+        return data
+
 class GLWrapper(object):
     def __init__(self):
         glutInit(len(sys.argv), sys.argv)
@@ -46,31 +73,11 @@ class GLWrapper(object):
         self.xrotation = 0
         self.yrotation = 0
 
-        host = "localhost"
-        port = 5000
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.connect((host, port))
-        s.sendall("0,0")
-
-        sstring = s.recv(4)
-        size = struct.unpack(">L", sstring)[0]
-
-        data = ""
-        while 1:
-            tmp = s.recv(1024)
-            if not tmp: break
-            data += tmp
-            if len(data) >= size: break
-
-        print "final length:", len(data)
-        print "expected size:", size
-        s.close()
-
+        data = get_chunk_data(0, 0)
         vertex_data = struct.unpack(">%df" % (len(data)/4), data)
         #self.vbo = vertex_buffer.VertexBuffer(vertex_data)
-        self.disp_list = display_list.DisplayList(vertex_data)
-       
+        self.disp_list00 = display_list.DisplayList(vertex_data)
+
         glEnable(GL_LIGHTING)
         glEnable(GL_DEPTH_TEST)
 
@@ -105,8 +112,8 @@ class GLWrapper(object):
         glRotatef(self.xrotation, 1, 0, 0)
         glRotatef(self.yrotation, 0, 1, 0)
 
-        self.disp_list.draw()
-
+        self.disp_list00.draw()
+        
         glutSwapBuffers();
     
     def reshape(self, width, height):
