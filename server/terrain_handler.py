@@ -5,7 +5,7 @@ import packets
 class TerrainHandler(asyncore.dispatcher_with_send):
     def __init__(self, socket):
         asyncore.dispatcher_with_send.__init__(self, socket)
-        self.terrain = terrain.Terrain(100, 2)
+        self.terrain = terrain.Terrain(20, 0.8)
 
     def handle_read(self):
         request = self.recv(8192)

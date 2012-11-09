@@ -13,6 +13,7 @@ import os
 import struct
 import socket
 import vertex_buffer
+import display_list
 
 class GLWrapper(object):
     def __init__(self):
@@ -27,7 +28,8 @@ class GLWrapper(object):
         glutMouseFunc(self.mouse_press)
         glutReshapeFunc(self.reshape)
         glutIdleFunc(self.idle)
-        
+        glutSpecialFunc(self.special)
+
         print glGetString(GL_VERSION)
         
         glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -36,12 +38,13 @@ class GLWrapper(object):
         self.screen_width = 1.0
         self.fps = 120
         self.idle_tick = 1.0/self.fps
-        self.paused = False
         self.frames_drawn = 0
         self.second_timer = 0
         self.fullscreen = False
         self.scr_width = 800
         self.scr_height = 600
+        self.xrotation = 0
+        self.yrotation = 0
 
         host = "localhost"
         port = 5000
@@ -65,8 +68,11 @@ class GLWrapper(object):
         s.close()
 
         vertex_data = struct.unpack(">%df" % (len(data)/4), data)
-        self.vbo = vertex_buffer.VertexBuffer(vertex_data)
-
+        #self.vbo = vertex_buffer.VertexBuffer(vertex_data)
+        self.disp_list = display_list.DisplayList(vertex_data)
+       
+        glEnable(GL_LIGHTING)
+        glEnable(GL_DEPTH_TEST)
 
     def begin(self):
         glutMainLoop()
@@ -85,8 +91,22 @@ class GLWrapper(object):
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
 
-        self.vbo.draw()
-        
+        pos = [3, 3, 3, 1]
+        ambient = [0.5, 0.5, 0.5, 1.0]
+        diffuse = [0.5, 0.5, 0.5, 1.0]
+        specular = [0.1, 0.1, 0.1, 1.0]
+
+        glEnable(GL_LIGHT0)
+        glLightfv(GL_LIGHT0, GL_POSITION, pos)
+        glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
+        glLightfv(GL_LIGHT0, GL_SPECULAR, specular)
+
+        glRotatef(self.xrotation, 1, 0, 0)
+        glRotatef(self.yrotation, 0, 1, 0)
+
+        self.disp_list.draw()
+
         glutSwapBuffers();
     
     def reshape(self, width, height):
@@ -94,7 +114,7 @@ class GLWrapper(object):
             self.screen_width = float(width)/height
         else:
             self.screen_width = 1.0
-        
+
         glViewport(0,0, width,height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
@@ -107,7 +127,17 @@ class GLWrapper(object):
             
     def mouse_press(self, button, state, x, y):
         pass
-            
+
+    def special(self, key, x, y):
+        if key == GLUT_KEY_LEFT:
+            self.yrotation -= 10
+        elif key == GLUT_KEY_RIGHT:
+            self.yrotation += 10
+        elif key == GLUT_KEY_UP:
+            self.xrotation -= 10
+        elif key == GLUT_KEY_DOWN:
+            self.xrotation += 10
+           
     def keyboard(self, key, x, y):
         if key == '\x1b': #escape key
             print "Quit"
@@ -118,8 +148,6 @@ class GLWrapper(object):
                 glutFullScreen()
             else:
                 glutReshapeWindow(self.scr_width, self.scr_height)
-        elif key == ' ':
-            self.paused = not self.paused
             
     
 def main():
