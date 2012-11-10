@@ -23,5 +23,5 @@ class DisplayList(object):
 
 
     def draw(self):
-        glColor3f(0.7, 0.7, 0.7)
+        glColor3f(0.3, 0.35, 0.3)
         glCallList(self.disp_list)

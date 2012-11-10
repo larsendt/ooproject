@@ -81,6 +81,7 @@ class GLWrapper(object):
         self.scr_height = 600
         self.xrotation = 0
         self.yrotation = 0
+        self.light_rotation = 0
 
         data = get_chunk_data(0, 0, hostname, port)
         vertex_data = struct.unpack(">%df" % (len(data)/4), data)
@@ -89,6 +90,9 @@ class GLWrapper(object):
 
         glEnable(GL_LIGHTING)
         glEnable(GL_DEPTH_TEST)
+        glEnable(GL_COLOR_MATERIAL)
+        glEnable(GL_NORMALIZE)
+        glEnable(GL_BLEND)
 
     def begin(self):
         glutMainLoop()
@@ -97,6 +101,7 @@ class GLWrapper(object):
         if (time.clock() - self.time) > self.idle_tick:
             self.time = time.clock()
             self.frames_drawn += 1
+            self.light_rotation += 0.5
             if time.clock() - self.second_timer > 1:
                 glutSetWindowTitle("Streaming Terrain Viewer : %d FPS" % self.frames_drawn)
                 self.second_timer = time.clock()
@@ -107,20 +112,24 @@ class GLWrapper(object):
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
 
-        pos = [3, 3, 3, 1]
+        pos = [3, 1, 3, 1]
         ambient = [0.5, 0.5, 0.5, 1.0]
-        diffuse = [0.5, 0.5, 0.5, 1.0]
-        specular = [0.1, 0.1, 0.1, 1.0]
+        diffuse = [1.0, 1.0, 1.0, 1.0]
+        specular = [0.3, 0.3, 0.3, 1.0]
+        
+        glRotatef(self.xrotation, 1, 0, 0)
+        glRotatef(self.yrotation, 0, 1, 0)
 
+        glPushMatrix()
+        glRotatef(self.light_rotation, 0, 1, 0)
         glEnable(GL_LIGHT0)
         glLightfv(GL_LIGHT0, GL_POSITION, pos)
         glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
         glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
         glLightfv(GL_LIGHT0, GL_SPECULAR, specular)
+        glPopMatrix()
 
-        glRotatef(self.xrotation, 1, 0, 0)
-        glRotatef(self.yrotation, 0, 1, 0)
-
+        glTranslatef(-0.4, 0.0, -0.4)
         self.disp_list00.draw()
         
         glutSwapBuffers();
