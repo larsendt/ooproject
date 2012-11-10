@@ -6,7 +6,7 @@ class DisplayList(object):
         self.disp_list = glGenLists(1)
         glNewList(self.disp_list, GL_COMPILE)
 
-        glBegin(GL_POINTS)
+        glBegin(GL_TRIANGLES)
         for i in range(0, len(data), 6):
             v1 = data[i+0]
             v2 = data[i+1]

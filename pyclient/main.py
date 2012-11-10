@@ -15,25 +15,20 @@ import socket
 import vertex_buffer
 import display_list
 
-arg_hostname = "localhost"
-
-def get_chunk_data(x, y):
-        global arg_hostname
-        host = arg_hostname #"larsendt.com"
-        port = 5000
-
+def get_chunk_data(x, y, host, port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.connect((host, port))
         
         print "connected to: %s:%d" % (host, port)
+        print "requesting chunk: (%d, %d)" % (x, y)
 
         s.sendall("%d,%d" % (x, y))
 
         sstring = s.recv(4)
-        size = struct.unpack(">L", sstring)[0]
+        expected_size = struct.unpack(">L", sstring)[0]
         start = time.time()
-        print "expecting: %d bytes" % size
+        print "expecting: %.1f KB" % (expected_size/1000.0)
 
         data = ""
         
@@ -41,20 +36,22 @@ def get_chunk_data(x, y):
             tmp = s.recv(16384)
             if not tmp: break
             data += tmp
-            if len(data) >= size: break
+            if len(data) >= expected_size: break
 
-        print "final length:", len(data)
-        print "expected size:", size
+        print "final size: %.1f KB" % (len(data)/1000.0)
+
+        if len(data) != expected_size:
+            print "WARNING: size mismatch! expected %d bytes, got %d bytes" % (expected_size, len(data))
 
         difftime = time.time() - start
-        print "total time: %f seconds" % difftime
-        print "average bandwidth: %.2f KB/s" % (len(data)/difftime/1000)
+        print "total time: %.1f seconds" % difftime
+        print "average bandwidth: %.1f KB/s" % (len(data)/difftime/1000)
         s.close()
 
         return data
 
 class GLWrapper(object):
-    def __init__(self):
+    def __init__(self, hostname, port):
         #glutInit(len(sys.argv), sys.argv)
         glutInit(1, sys.argv[0])
         glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE)
@@ -85,7 +82,7 @@ class GLWrapper(object):
         self.xrotation = 0
         self.yrotation = 0
 
-        data = get_chunk_data(0, 0)
+        data = get_chunk_data(0, 0, hostname, port)
         vertex_data = struct.unpack(">%df" % (len(data)/4), data)
         #self.vbo = vertex_buffer.VertexBuffer(vertex_data)
         self.disp_list00 = display_list.DisplayList(vertex_data)
@@ -159,7 +156,7 @@ class GLWrapper(object):
            
     def keyboard(self, key, x, y):
         if key == '\x1b': #escape key
-            print "Quit"
+            print "quitting"
             sys.exit(0)
         elif key == 'f':
             self.fullscreen = not self.fullscreen
@@ -170,9 +167,7 @@ class GLWrapper(object):
             
     
 def main(argv):
-    global arg_hostname
     print "Initializing OpenGL..."
-    print len(argv)
     if (len(argv) == 2):
         arg_hostname = argv[1]
         print "Hostname argument: " + arg_hostname
@@ -180,7 +175,7 @@ def main(argv):
         arg_hostname = "larsendt.com"
         print "No hostname argument provided - using " + arg_hostname
     
-    gl_wrapper = GLWrapper()
+    gl_wrapper = GLWrapper(arg_hostname, 5000)
     gl_wrapper.begin()
         
     
