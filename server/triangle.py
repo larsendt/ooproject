@@ -9,3 +9,11 @@ class Triangle(object):
         self.facenormal = v1.cross(v2)
         self.vertices = [v1, v2, v3]
         self.normals = [self.facenormal, self.facenormal, self.facenormal]
+
+    def serial_data(self):
+        return [self.v1.x, self.v1.y, self.v1.z,
+                self.normals[0].x, self.normals[0].y, self.normals[0].z,
+                self.v2.x, self.v2.y, self.v2.z,
+                self.normals[1].x, self.normals[1].y, self.normals[1].z,
+                self.v3.x, self.v3.y, self.v3.z,
+                self.normals[2].x, self.normals[2].y, self.normals[2].z]

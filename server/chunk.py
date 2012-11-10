@@ -11,10 +11,9 @@ class Chunk(object):
         tmp_serial = []
 
         for t in triangles:
-            tmp_serial += t.vertices[0].data + t.vertices[1].data + t.vertices[2].data
-            tmp_serial += t.normals[0].data + t.normals[1].data + t.normals[2].data
+            tmp_serial += t.serial_data()
 
-        self.serialized_data = struct.pack("!%sf" % len(tmp_serial), *tmp_serial)
+        self.serialized_data = struct.pack(">%sf" % len(tmp_serial), *tmp_serial)
 
     def serial_vertex_data(self):
         """Return the serialized, network-ready data
