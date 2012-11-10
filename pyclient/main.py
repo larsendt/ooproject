@@ -25,25 +25,30 @@ def get_chunk_data(x, y):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.connect((host, port))
+        
+        print "connected to: %s:%d" % (host, port)
+
         s.sendall("%d,%d" % (x, y))
 
         sstring = s.recv(4)
         size = struct.unpack(">L", sstring)[0]
+        start = time.time()
         print "expecting: %d bytes" % size
 
         data = ""
-        
         
         while 1:
             tmp = s.recv(16384)
             if not tmp: break
             data += tmp
-            ratio = len(data) / float(size)
-            print "%.2f%%" % (ratio*100)
             if len(data) >= size: break
 
         print "final length:", len(data)
         print "expected size:", size
+
+        difftime = time.time() - start
+        print "total time: %f seconds" % difftime
+        print "average bandwidth: %.2f KB/s" % (len(data)/difftime/1000)
         s.close()
 
         return data
