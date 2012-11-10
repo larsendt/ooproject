@@ -15,9 +15,13 @@ import socket
 import vertex_buffer
 import display_list
 
+arg_hostname = "localhost"
+
 def get_chunk_data(x, y):
-        host = "larsendt.com"
+        global arg_hostname
+        host = arg_hostname #"larsendt.com"
         port = 5000
+
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.connect((host, port))
@@ -28,6 +32,8 @@ def get_chunk_data(x, y):
         print "expecting: %d bytes" % size
 
         data = ""
+        
+        
         while 1:
             tmp = s.recv(16384)
             if not tmp: break
@@ -44,7 +50,8 @@ def get_chunk_data(x, y):
 
 class GLWrapper(object):
     def __init__(self):
-        glutInit(len(sys.argv), sys.argv)
+        #glutInit(len(sys.argv), sys.argv)
+        glutInit(1, sys.argv[0])
         glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE)
         glutInitWindowSize(800, 600)
         glutCreateWindow('Dynamic FBM Warping')
@@ -157,15 +164,20 @@ class GLWrapper(object):
                 glutReshapeWindow(self.scr_width, self.scr_height)
             
     
-def main():
+def main(argv):
+    global arg_hostname
     print "Initializing OpenGL..."
-    try:
-        gl_wrapper = GLWrapper()
-        gl_wrapper.begin()
-    except Exception as excep:
-        print excep
-        sys.exit(1)
+    print len(argv)
+    if (len(argv) == 2):
+        arg_hostname = argv[1]
+        print "Hostname argument: " + arg_hostname
+    else:
+        arg_hostname = "larsendt.com"
+        print "No hostname argument provided - using " + arg_hostname
+    
+    gl_wrapper = GLWrapper()
+    gl_wrapper.begin()
         
     
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
