@@ -15,9 +15,48 @@ import socket
 import vertex_buffer
 import display_list
 
+arg_hostname = "localhost"
+
+def get_chunk_data(x, y):
+        global arg_hostname
+        host = arg_hostname #"larsendt.com"
+        port = 5000
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.connect((host, port))
+        
+        print "connected to: %s:%d" % (host, port)
+
+        s.sendall("%d,%d" % (x, y))
+
+        sstring = s.recv(4)
+        size = struct.unpack(">L", sstring)[0]
+        start = time.time()
+        print "expecting: %d bytes" % size
+
+        data = ""
+        
+        while 1:
+            tmp = s.recv(16384)
+            if not tmp: break
+            data += tmp
+            if len(data) >= size: break
+
+        print "final length:", len(data)
+        print "expected size:", size
+
+        difftime = time.time() - start
+        print "total time: %f seconds" % difftime
+        print "average bandwidth: %.2f KB/s" % (len(data)/difftime/1000)
+        s.close()
+
+        return data
+
 class GLWrapper(object):
     def __init__(self):
-        glutInit(len(sys.argv), sys.argv)
+        #glutInit(len(sys.argv), sys.argv)
+        glutInit(1, sys.argv[0])
         glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE)
         glutInitWindowSize(800, 600)
         glutCreateWindow('Dynamic FBM Warping')
@@ -46,31 +85,11 @@ class GLWrapper(object):
         self.xrotation = 0
         self.yrotation = 0
 
-        host = "localhost"
-        port = 5000
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.connect((host, port))
-        s.sendall("0,0")
-
-        sstring = s.recv(4)
-        size = struct.unpack(">L", sstring)[0]
-
-        data = ""
-        while 1:
-            tmp = s.recv(1024)
-            if not tmp: break
-            data += tmp
-            if len(data) >= size: break
-
-        print "final length:", len(data)
-        print "expected size:", size
-        s.close()
-
+        data = get_chunk_data(0, 0)
         vertex_data = struct.unpack(">%df" % (len(data)/4), data)
         #self.vbo = vertex_buffer.VertexBuffer(vertex_data)
-        self.disp_list = display_list.DisplayList(vertex_data)
-       
+        self.disp_list00 = display_list.DisplayList(vertex_data)
+
         glEnable(GL_LIGHTING)
         glEnable(GL_DEPTH_TEST)
 
@@ -105,8 +124,8 @@ class GLWrapper(object):
         glRotatef(self.xrotation, 1, 0, 0)
         glRotatef(self.yrotation, 0, 1, 0)
 
-        self.disp_list.draw()
-
+        self.disp_list00.draw()
+        
         glutSwapBuffers();
     
     def reshape(self, width, height):
@@ -150,15 +169,20 @@ class GLWrapper(object):
                 glutReshapeWindow(self.scr_width, self.scr_height)
             
     
-def main():
+def main(argv):
+    global arg_hostname
     print "Initializing OpenGL..."
-    try:
-        gl_wrapper = GLWrapper()
-        gl_wrapper.begin()
-    except Exception as excep:
-        print excep
-        sys.exit(1)
+    print len(argv)
+    if (len(argv) == 2):
+        arg_hostname = argv[1]
+        print "Hostname argument: " + arg_hostname
+    else:
+        arg_hostname = "larsendt.com"
+        print "No hostname argument provided - using " + arg_hostname
+    
+    gl_wrapper = GLWrapper()
+    gl_wrapper.begin()
         
     
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
