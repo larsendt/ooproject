@@ -30,15 +30,14 @@ class ChunkGenerator(object):
             if (x >= (self.dimensions-1)) or (y >= (self.dimensions-1)):
                 continue
 
-            if tricount % 2 == 0:
-                v1 = vertices[x][y]
-                v2 = vertices[x+1][y]
-                v3 = vertices[x][y+1]
-            else:
-                v1 = vertices[x+1][y]
-                v2 = vertices[x+1][y+1]
-                v3 = vertices[x][y+1]
-
+            v1 = vertices[x][y]
+            v2 = vertices[x+1][y]
+            v3 = vertices[x][y+1]
+            triangles.append(triangle.Triangle(v1, v2, v3))
+            
+            v1 = vertices[x][y+1]
+            v2 = vertices[x+1][y+1]
+            v3 = vertices[x+1][y]
             triangles.append(triangle.Triangle(v1, v2, v3))
 
         return chunk.Chunk(triangles) 
