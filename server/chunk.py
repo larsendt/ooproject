@@ -1,9 +1,11 @@
 import struct
 
 class Chunk(object):
-    def __init__(self, triangles, texture_filename = ""):
+    def __init__(self, triangles, x, y, texture_filename = ""):
         self.triangles = triangles
         self.texture_data = []
+        self.x = x
+        self.y = y
 
         if texture_filename:
             self.load_texture(texture_filename)

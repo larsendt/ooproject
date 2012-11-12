@@ -14,6 +14,8 @@ import struct
 import socket
 import vertex_buffer
 import display_list
+import json
+import base64
 
 def get_chunk_data(x, y, host, port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,7 +25,12 @@ def get_chunk_data(x, y, host, port):
         print "connected to: %s:%d" % (host, port)
         print "requesting chunk: (%d, %d)" % (x, y)
 
-        s.sendall("%d,%d" % (x, y))
+        js = json.dumps({
+            "type":"coords",
+            "x":0,
+            "y":0
+        })
+        s.sendall(struct.pack(">L", len(js)) + js)
 
         sstring = s.recv(4)
         expected_size = struct.unpack(">L", sstring)[0]
@@ -48,7 +55,7 @@ def get_chunk_data(x, y, host, port):
         print "average bandwidth: %.1f KB/s" % (len(data)/difftime/1000)
         s.close()
 
-        return data
+        return base64.b64decode(json.loads(data)["vertex_data"])
 
 class GLWrapper(object):
     def __init__(self, hostname, port):
@@ -81,6 +88,7 @@ class GLWrapper(object):
         self.scr_height = 600
         self.xrotation = 0
         self.yrotation = 0
+        self.light_rotation = 0
 
         data = get_chunk_data(0, 0, hostname, port)
         vertex_data = struct.unpack(">%df" % (len(data)/4), data)
@@ -89,6 +97,9 @@ class GLWrapper(object):
 
         glEnable(GL_LIGHTING)
         glEnable(GL_DEPTH_TEST)
+        glEnable(GL_COLOR_MATERIAL)
+        glEnable(GL_NORMALIZE)
+        glEnable(GL_BLEND)
 
     def begin(self):
         glutMainLoop()
@@ -97,6 +108,7 @@ class GLWrapper(object):
         if (time.clock() - self.time) > self.idle_tick:
             self.time = time.clock()
             self.frames_drawn += 1
+            self.light_rotation += 0.5
             if time.clock() - self.second_timer > 1:
                 glutSetWindowTitle("Streaming Terrain Viewer : %d FPS" % self.frames_drawn)
                 self.second_timer = time.clock()
@@ -107,20 +119,24 @@ class GLWrapper(object):
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
 
-        pos = [3, 3, 3, 1]
+        pos = [3, 1, 3, 1]
         ambient = [0.5, 0.5, 0.5, 1.0]
-        diffuse = [0.5, 0.5, 0.5, 1.0]
-        specular = [0.1, 0.1, 0.1, 1.0]
+        diffuse = [1.0, 1.0, 1.0, 1.0]
+        specular = [0.3, 0.3, 0.3, 1.0]
+        
+        glRotatef(self.xrotation, 1, 0, 0)
+        glRotatef(self.yrotation, 0, 1, 0)
 
+        glPushMatrix()
+        glRotatef(self.light_rotation, 0, 1, 0)
         glEnable(GL_LIGHT0)
         glLightfv(GL_LIGHT0, GL_POSITION, pos)
         glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
         glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
         glLightfv(GL_LIGHT0, GL_SPECULAR, specular)
+        glPopMatrix()
 
-        glRotatef(self.xrotation, 1, 0, 0)
-        glRotatef(self.yrotation, 0, 1, 0)
-
+        glTranslatef(-0.4, 0.0, -0.4)
         self.disp_list00.draw()
         
         glutSwapBuffers();

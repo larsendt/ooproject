@@ -2,6 +2,7 @@ import asyncore
 import terrain
 import packets
 import config
+import struct
 
 class TerrainHandler(asyncore.dispatcher_with_send):
     def __init__(self, socket):
@@ -24,30 +25,29 @@ class TerrainHandler(asyncore.dispatcher_with_send):
         self.terrain = terrain.Terrain(chunk_res, chunk_size)
 
     def handle_read(self):
-        request = self.recv(8192)
-        response_packet = None
+        request = ""
+        try:
+            expected_size = struct.unpack(">L", self.recv(4))[0]
+        except:
+            self.send(packets.ErrorPacket("Unrecognized request").data())
+            return
+
+        while 1:
+            tmp = self.recv(8192)
+            if not tmp: break
+            request += tmp
+            if len(request) >= expected_size: break
 
         try:
             x, y = self.parse_request(request)
-        except ValueError:
-            response = packets.ErrorPacket("Invalid request")
+        except ValueError as e:
+            response = packets.ErrorPacket(repr(e))
         else:
             response = packets.ChunkPacket(self.terrain.get_chunk(x, y))
 
         self.send(response.data())
 
     def parse_request(self, request):
-        l = request.split(",")
-
-        if len(l) != 2:
-            raise ValueError("Invalid request")
-
-        try:
-            coords = int(l[0]), int(l[1])
-        except:
-            raise ValueError("Unable to convert coords to integers")
-        else:
-            print "coords requested:", coords
-
-        return coords
+        return packets.dataFromRequest(request)
+        
 
