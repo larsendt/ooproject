@@ -40,7 +40,7 @@ class ChunkGenerator(object):
             v3 = vertices[x+1][y]
             triangles.append(triangle.Triangle(v1, v2, v3))
 
-        return chunk.Chunk(triangles) 
+        return chunk.Chunk(triangles, x=x, y=y) 
 
 
 

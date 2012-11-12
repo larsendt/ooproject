@@ -23,7 +23,7 @@ class Config(object):
         f = open(self.filename, "w")
         f.write(json.dumps(d))
         f.close()
-        print "set:", key, value
+        print "config set:", key, value
 
     def get(self, key):
         try:
@@ -36,7 +36,7 @@ class Config(object):
         f.close()
         value = d[key]
 
-        print "get:", key, value
+        print "config get:", key, value
         return value
 
 

@@ -14,6 +14,8 @@ import struct
 import socket
 import vertex_buffer
 import display_list
+import json
+import base64
 
 def get_chunk_data(x, y, host, port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,7 +25,12 @@ def get_chunk_data(x, y, host, port):
         print "connected to: %s:%d" % (host, port)
         print "requesting chunk: (%d, %d)" % (x, y)
 
-        s.sendall("%d,%d" % (x, y))
+        js = json.dumps({
+            "type":"coords",
+            "x":0,
+            "y":0
+        })
+        s.sendall(struct.pack(">L", len(js)) + js)
 
         sstring = s.recv(4)
         expected_size = struct.unpack(">L", sstring)[0]
@@ -48,7 +55,7 @@ def get_chunk_data(x, y, host, port):
         print "average bandwidth: %.1f KB/s" % (len(data)/difftime/1000)
         s.close()
 
-        return data
+        return base64.b64decode(json.loads(data)["vertex_data"])
 
 class GLWrapper(object):
     def __init__(self, hostname, port):
