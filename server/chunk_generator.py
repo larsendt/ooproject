@@ -5,7 +5,7 @@ class ChunkGenerator(object):
         self.size = size
         self.dimensions = dimensions
 
-    def generate_chunk(self, x, y):
+    def generate_chunk(self, x, z):
         p = perlin.SimplexNoise()
 
         # generate the initial heightmap
@@ -14,9 +14,9 @@ class ChunkGenerator(object):
             arr = []
             for j in range(self.dimensions):
                 xval = (x + i) * (float(self.size) / self.dimensions)
-                yval = (y + j) * (float(self.size) / self.dimensions)
-                h = p.noise2(xval, yval)
-                arr.append(vector.Vec3(xval, yval, h))
+                zval = (z + j) * (float(self.size) / self.dimensions)
+                h = p.noise2(xval, zval)
+                arr.append(vector.Vec3(xval, h, zval))
             vertices.append(arr)
         
         # split the heightmap into triangles
@@ -25,19 +25,19 @@ class ChunkGenerator(object):
 
         for i in range(tricount):
             x = i % self.dimensions
-            y = i / self.dimensions
+            z = i / self.dimensions
 
-            if (x >= (self.dimensions-1)) or (y >= (self.dimensions-1)):
+            if (x >= (self.dimensions-1)) or (z >= (self.dimensions-1)):
                 continue
 
-            v1 = vertices[x][y]
-            v2 = vertices[x+1][y]
-            v3 = vertices[x][y+1]
+            v1 = vertices[x][z]
+            v2 = vertices[x+1][z]
+            v3 = vertices[x][z+1]
             triangles.append(triangle.Triangle(v1, v2, v3))
             
-            v1 = vertices[x][y+1]
-            v2 = vertices[x+1][y+1]
-            v3 = vertices[x+1][y]
+            v1 = vertices[x][z+1]
+            v2 = vertices[x+1][z+1]
+            v3 = vertices[x+1][z]
             triangles.append(triangle.Triangle(v1, v2, v3))
 
         return chunk.Chunk(triangles) 
