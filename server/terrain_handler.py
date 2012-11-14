@@ -27,7 +27,7 @@ class TerrainHandler(asyncore.dispatcher_with_send):
     def handle_read(self):
         request = ""
         try:
-            expected_size = struct.unpack(">L", self.recv(4))[0]
+            expected_size = int(self.recv(12))
         except:
             self.send(packets.ErrorPacket("Unrecognized request").data())
             return
