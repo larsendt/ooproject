@@ -30,10 +30,10 @@ def get_chunk_data(x, y, host, port):
             "x":0,
             "y":0
         })
-        s.sendall(struct.pack(">L", len(js)) + js)
+        s.sendall(("%12d" % len(js)) + js)
 
-        sstring = s.recv(4)
-        expected_size = struct.unpack(">L", sstring)[0]
+        sstring = s.recv(12)
+        expected_size = int(sstring) 
         start = time.time()
         print "expecting: %.1f KB" % (expected_size/1000.0)
 
