@@ -30,10 +30,10 @@ def get_chunk_data(x, y, host, port):
             "x":0,
             "y":0
         })
-        s.sendall(("%12d" % len(js)) + js)
+        s.sendall(struct.pack(">L", len(js)) + js)
 
-        sstring = s.recv(12)
-        expected_size = int(sstring) 
+        sstring = s.recv(4)
+        expected_size = struct.unpack(">L", sstring)[0]
         start = time.time()
         print "expecting: %.1f KB" % (expected_size/1000.0)
 
@@ -41,9 +41,13 @@ def get_chunk_data(x, y, host, port):
         
         while 1:
             tmp = s.recv(16384)
-            if not tmp: break
+            if not tmp: 
+                print "connection closed"
+                break
             data += tmp
-            if len(data) >= expected_size: break
+            if len(data) >= expected_size: 
+                print "max data"
+                break
 
         print "final size: %.1f KB" % (len(data)/1000.0)
 
