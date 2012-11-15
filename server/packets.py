@@ -7,7 +7,7 @@ class Packet(object):
         self.msg = data
 
     def data(self):
-        return ("%012d" % len(self.msg)) + self.msg
+        return struct.pack(">L", len(self.msg)) + self.msg 
 
 class ChunkPacket(Packet):
     def __init__(self, chunk):
@@ -20,18 +20,18 @@ class ChunkPacket(Packet):
             "y":self.chunk.y,
             "vertex_data":svd
         }
-        js = json.dumps(d)
-        return ("%012d" % len(js)) + js 
+        js = json.dumps(d) 
+        return struct.pack(">L", len(js)) + js
 
 class ErrorPacket(Packet):
     def __init__(self, error_msg):
         self.msg = json.dumps({
             "type":"error",
             "message":error_msg,
-            }) 
+            })
 
     def data(self):
-        return ("%012d" % len(self.msg)) + self.msg 
+        return struct.pack(">L", len(self.msg)) + self.msg
 
 def dataFromRequest(request_data):
     d = json.loads(request_data)

@@ -25,23 +25,19 @@ class TerrainHandler(asyncore.dispatcher_with_send):
         self.terrain = terrain.Terrain(chunk_res, chunk_size)
 
     def handle_read(self):
-        print "handle_read"
         request = ""
         try:
-            expected_size = int(self.recv(12))
-            print "got packet with expected_size:", expected_size
+            expected_size = struct.unpack(">L", self.recv(4))[0]
         except:
-            self.sendall(packets.ErrorPacket("Unrecognized request").data())
+            self.send(packets.ErrorPacket("Unrecognized request").data())
             return
 
-        print "receiving data"
         while 1:
             tmp = self.recv(8192)
             if not tmp: break
             request += tmp
             if len(request) >= expected_size: break
 
-        print "got request:", request
         try:
             x, y = self.parse_request(request)
         except ValueError as e:
@@ -49,9 +45,7 @@ class TerrainHandler(asyncore.dispatcher_with_send):
         else:
             response = packets.ChunkPacket(self.terrain.get_chunk(x, y))
 
-        print "sending response (%d bytes)" % len(response.data())
-        self.sendall(response.data())
-        print "done sending"
+        self.send(response.data())
 
     def parse_request(self, request):
         return packets.dataFromRequest(request)
