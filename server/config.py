@@ -25,18 +25,35 @@ class Config(object):
         f.close()
         print "config set:", key, value
 
-    def get(self, key):
+    def get(self, key, default_value=None, save_default=False):
         try:
             f = open(self.filename, "r")
         except IOError:
-            raise KeyError("Config item '%s' was not found in '%s'" 
-                    % (key, self.filename))
+            f = open(self.filename, "w")
+            f.write("")
+            f.close()
+            f = open(self.filename, "r")
 
-        d = json.loads(f.read())
+        try:
+            d = json.loads(f.read())
+        except ValueError:
+            if default_value is None:
+                raise ValueError("Bad JSON file '%s'" % self.filename)
+            elif save_default:
+                self.set(key, default_value)
+            return default_value
+
         f.close()
-        value = d[key]
 
-        print "config get:", key, value
+        try:
+            value = d[key]
+        except KeyError:
+            if default_value is None:
+                raise ValueError("Key '%s' was not in '%s'" % (key, self.filename))
+            elif save_default:
+                self.set(key, default_value)
+            return default_value
+
         return value
 
 
