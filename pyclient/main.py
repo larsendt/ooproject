@@ -10,49 +10,25 @@ import time
 import math
 import random
 import os
-import struct
-import socket
+import urllib2
 import vertex_buffer
 import display_list
 import json
 import base64
 
 def get_chunk_data(x, y, host, port):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.connect((host, port))
-        
-        print "connected to: %s:%d" % (host, port)
-        print "requesting chunk: (%d, %d)" % (x, y)
+        print "requesting chunk (%d, %d) from host %s:%d" % (x, y, host, port)
 
         js = json.dumps({
             "type":"coords",
             "x":0,
             "y":0
         })
-        s.sendall(struct.pack(">L", len(js)) + js)
 
-        sstring = s.recv(4)
-        expected_size = struct.unpack(">L", sstring)[0]
         start = time.time()
-        print "expecting: %.1f KB" % (expected_size/1000.0)
-
-        data = ""
-        
-        while 1:
-            tmp = s.recv(16384)
-            if not tmp: 
-                print "connection closed"
-                break
-            data += tmp
-            if len(data) >= expected_size: 
-                print "max data"
-                break
-
-        print "final size: %.1f KB" % (len(data)/1000.0)
-
-        if len(data) != expected_size:
-            print "WARNING: size mismatch! expected %d bytes, got %d bytes" % (expected_size, len(data))
+       
+        f = urllib2.urlopen("http://%s:%d" % (host, port))
+        data = f.read()
 
         difftime = time.time() - start
         print "total time: %.1f seconds" % difftime
