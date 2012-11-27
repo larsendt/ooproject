@@ -15,27 +15,27 @@ import vertex_buffer
 import display_list
 import json
 import base64
+import struct
 
 def get_chunk_data(x, y, host, port):
         print "requesting chunk (%d, %d) from host %s:%d" % (x, y, host, port)
 
-        js = json.dumps({
-            "type":"coords",
-            "x":0,
-            "y":0
-        })
-
         start = time.time()
        
-        f = urllib2.urlopen("http://%s:%d" % (host, port))
+        f = urllib2.urlopen("http://%s:%d/?x=%d&y=%d" % (host, port, x, y))
         data = f.read()
+        f.close()
 
         difftime = time.time() - start
         print "total time: %.1f seconds" % difftime
         print "average bandwidth: %.1f KB/s" % (len(data)/difftime/1000)
-        s.close()
 
-        return base64.b64decode(json.loads(data)["vertex_data"])
+        obj = json.loads(data)
+
+        if obj["type"] == "error":
+            raise ValueError("Server error: " + obj["error"])
+        else:
+            return base64.b64decode(obj["vertex_data"])
 
 class GLWrapper(object):
     def __init__(self, hostname, port):
