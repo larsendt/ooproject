@@ -164,14 +164,14 @@ class GLWrapper(object):
     
 def main(argv):
     print "Initializing OpenGL..."
-    if (len(argv) == 2):
+    if (len(argv) == 3):
         arg_hostname = argv[1]
-        print "Hostname argument: " + arg_hostname
+        arg_port = int(argv[2])
+        print "Host: %s:%d" % (arg_hostname, arg_port)
     else:
-        arg_hostname = "larsendt.com"
-        print "No hostname argument provided - using " + arg_hostname
+        print "Usage: %s <hostname> <port>" % argv[0]
     
-    gl_wrapper = GLWrapper(arg_hostname, 5000)
+    gl_wrapper = GLWrapper(arg_hostname, arg_port)
     gl_wrapper.begin()
         
     
