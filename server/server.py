@@ -7,7 +7,7 @@ import json
 import base64
 
 urls = (
-        "/(.*)", "terrain_data",
+        "/", "terrain_data",
 )
 
 class terrain_data(object):
@@ -19,7 +19,7 @@ class terrain_data(object):
 		self.chunk_size = self.conf.get("chunk_size", default_value=1, save_default=True)
 		self.terrain = terrain.Terrain(self.chunk_res, self.chunk_size)
 
-	def GET(self, coords):
+	def GET(self):
 		params = web.input()
 		
 		try:
