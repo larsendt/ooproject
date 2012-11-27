@@ -33,7 +33,7 @@ public class DataFetcher extends AsyncTask<String, Integer, String> {
         try {
             response = httpclient.execute(new HttpGet("http://larsendt.com:1234/?x=0&y=0"));
         } catch (IOException e) {
-            Log.d("FETCHER", "HttpResponse broke...");
+            Log.d(MyGLRenderer.TAG, "HttpResponse broke...");
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             return "";
         }
@@ -44,12 +44,12 @@ public class DataFetcher extends AsyncTask<String, Integer, String> {
             try {
                 response.getEntity().writeTo(out);
             } catch(IOException e) {
-                Log.d("FETCHER", "ByteArrayOutputStream broke when fetching chunk data");
+                Log.d(MyGLRenderer.TAG, "ByteArrayOutputStream broke when fetching chunk data");
                 e.printStackTrace();
                 return "";
             }
             String input_json = out.toString();
-            Log.d("FETCHER", "response is" + input_json);
+            Log.d(MyGLRenderer.TAG, "response is" + input_json);
             input_json = input_json.substring(HEADER_BYTE_COUNT);
             return input_json;
         }
@@ -57,13 +57,13 @@ public class DataFetcher extends AsyncTask<String, Integer, String> {
             try {
                 response.getEntity().getContent().close();
             } catch(IOException e) {
-                Log.d("FETCHER", "Response broke");
+                Log.d(MyGLRenderer.TAG, "Response broke");
                 e.printStackTrace();
             }
-            Log.d("FETCHER", statusLine.getReasonPhrase());
+            Log.d(MyGLRenderer.TAG, statusLine.getReasonPhrase());
         }
 
-		Log.d("FETCHER", "Broke somewhere.");
+		Log.d(MyGLRenderer.TAG, "Broke somewhere.");
 		return null;
 	}
 

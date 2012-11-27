@@ -36,11 +36,9 @@ public class OpenGLES20Complete extends Activity {
         mGLView = new MyGLSurfaceView(this);
         setContentView(mGLView);
         
-        Log.d("FETCHER", "starting");
         
         DataFetcher df = new DataFetcher();
-        
-    	df.execute("banana");
+    	//df.execute("banana");
     }
 
     @Override
