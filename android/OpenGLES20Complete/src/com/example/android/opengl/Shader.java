@@ -7,11 +7,6 @@ public class Shader {
 	
 	private int program;
 	
-	public Shader(){
-		
-		
-	}
-	
 	public Shader(String vertCode, String fragCode)
 	{
 

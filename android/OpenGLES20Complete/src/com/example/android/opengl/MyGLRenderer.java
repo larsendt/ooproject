@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Arrays;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -50,7 +51,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "void main() {" +
         "	gl_PointSize = 5.0;" +
         // the matrix must be included as a modifier of gl_Position
-        "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1);" +
+        "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
         "}";
 
     private final String fragmentShaderCode =
@@ -59,9 +60,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "  gl_FragColor = vec4(1,1,1,1);" +
         "}";
     
-    private final float[] pMatrix = new float[16];
-    private final float[] mvMatrix = new float[16];
-
+    private float[] pMatrix = new float[16];
+    private float[] mvMatrix = new float[16];
+    private float[] tmpMatrix = new float[16];
     // Declare as volatile because we are updating it from another thread
     public volatile float mxAngle;
     public volatile float myAngle;
@@ -79,6 +80,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         m_dataFetcher = new DataFetcher();
         m_dataFetcher.execute("banana");
+        
+        Matrix.setIdentityM(pMatrix, 0);
+        Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
     }
 
     public void onDrawFrame(GL10 unused) {
@@ -87,7 +91,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             float[] vertex_data = m_dataFetcher.getVertexData();
             int[] index_data = new int[vertex_data.length / 6];
 
-            for(int i = 0; i < index_data.length; i++) {
+            for(int i = 0; i < index_data.length; i+=2) {
                 index_data[i] = i;
             }
 
@@ -102,10 +106,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         Matrix.setIdentityM(mvMatrix, 0);
         
+        Matrix.translateM(mvMatrix, 0, 0, 0, -5.0f);
         
-        Matrix.translateM(mvMatrix, 0, mvMatrix, 0, 0.0f,0.0f,-10.0f);
-        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
-        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
+        Matrix.rotateM(mvMatrix, 0, -mxAngle, 1.0f, 0.0f, 0.0f);
+        Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
+        
+        
+        
         
 
         // Draw triangle
@@ -126,7 +133,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
         Matrix.setIdentityM(pMatrix, 0);
-        Matrix.perspectiveM(pMatrix, 0, 45, ratio, .1f,100);
+        Matrix.perspectiveM(pMatrix, 0, 60.0f, ratio, .01f,100.0f);
+        //Matrix.orthoM(pMatrix, 0, -2*ratio, 2*ratio, -2, 2, -4, 4);
 
     }
 

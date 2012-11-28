@@ -109,12 +109,12 @@ public class VBO {
     				ELEMENTS_IN_VERTEX,
     				GLES20.GL_FLOAT,
     				false,
-    				0,
+    				12,
     				0
     	);
     	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
     	
-    	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
+    	
     	
     	MyGLRenderer.checkGlError("glBindBuffer");
     	
@@ -130,9 +130,11 @@ public class VBO {
     	
     	size = ib.get();
     	
+    	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
+    	
     	GLES20.glDrawElements(
     			GLES20.GL_POINTS,
-    			size, 
+    			size/4, 
     			GLES20.GL_UNSIGNED_INT, 
     			0
     	);

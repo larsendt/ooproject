@@ -49,7 +49,7 @@ public class DataFetcher extends AsyncTask<String, Integer, String> {
                 return "";
             }
             String input_json = out.toString();
-            Log.d(MyGLRenderer.TAG, "response is" + input_json);
+            //Log.d(MyGLRenderer.TAG, "response is" + input_json);
             return input_json;
         }
         else {
