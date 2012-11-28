@@ -20,8 +20,7 @@ public class VBO {
     private static final int INT_BYTE_SIZE = 4;
     private static final int ELEMENTS_IN_VERTEX = 3;
     
-    private float vertices[];
-    private int elements[];
+    private int elements_length;
     
     public VBO(int shaderprogram)
     {
@@ -88,6 +87,8 @@ public class VBO {
     			GLES20.GL_STATIC_DRAW
     	);
     	
+    	elements_length = indices.length;
+    	
     	MyGLRenderer.checkGlError("glBufferData");
     	
     }
@@ -115,26 +116,14 @@ public class VBO {
     	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
     	
     	
-    	
+    	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
     	MyGLRenderer.checkGlError("glBindBuffer");
     	
-    	int size;
-    	IntBuffer ib = IntBuffer.allocate(1);
-    	GLES20.glGetBufferParameteriv(
-    			GLES20.GL_ELEMENT_ARRAY_BUFFER,
-    			GLES20.GL_BUFFER_SIZE,
-    			ib
-    	);
     	
-    	MyGLRenderer.checkGlError("glGetBufferParameteriv");
-    	
-    	size = ib.get();
-    	
-    	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
     	
     	GLES20.glDrawElements(
     			GLES20.GL_POINTS,
-    			size/4, 
+    			elements_length, 
     			GLES20.GL_UNSIGNED_INT, 
     			0
     	);

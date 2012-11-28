@@ -49,7 +49,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "attribute vec3 vertex;" +
 
         "void main() {" +
-        "	gl_PointSize = 5.0;" +
+        "	gl_PointSize = 2.0;" +
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
         "}";
@@ -89,6 +89,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk) {
             float[] vertex_data = m_dataFetcher.getVertexData();
+            Log.d(TAG, "Outputting vertices");
+            for (int i = 0; i < vertex_data.length; i +=6){
+            	Log.d(TAG, Float.toString(vertex_data[i]) + " | " + Float.toString(vertex_data[i+1]) + " | " + Float.toString(vertex_data[i+2]));
+            }
+            
             int[] index_data = new int[vertex_data.length / 6];
 
             for(int i = 0; i < index_data.length; i+=2) {
@@ -106,15 +111,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         Matrix.setIdentityM(mvMatrix, 0);
         
-        Matrix.translateM(mvMatrix, 0, 0, 0, -5.0f);
+        Matrix.translateM(mvMatrix, 0, 0.0f,0.0f, -5.0f);
         
         Matrix.rotateM(mvMatrix, 0, -mxAngle, 1.0f, 0.0f, 0.0f);
         Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
         
+        Matrix.translateM(mvMatrix, 0, -2.0f,0f, -1.0f);
         
-        
-        
-
         // Draw triangle
         shader.useProgram();
         
