@@ -66,6 +66,7 @@ public class Shader {
 		if (location == -1){
 			Log.d(MyGLRenderer.TAG, "Location for " + name + " is invalid");
 		}
+		
 		GLES20.glUniformMatrix4fv(location, 1, false, values, 0);
 	}
 	

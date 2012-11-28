@@ -96,9 +96,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Draw triangle
         MyGLRenderer.checkGlError("start of draw");
+        shader.useProgram();
+        
         shader.setMatrices(mvMatrix, pMatrix);
         MyGLRenderer.checkGlError("shader.setMatrices");
-        shader.useProgram();
+        
         MyGLRenderer.checkGlError("shader.useProgram");
         vbo.draw();
     }
