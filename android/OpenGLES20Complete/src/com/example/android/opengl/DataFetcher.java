@@ -5,6 +5,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -18,20 +21,17 @@ import org.json.JSONObject;
 import android.util.Base64;
 import android.os.AsyncTask;
 import android.util.Log;
+import org.json.JSONTokener;
 
 public class DataFetcher extends AsyncTask<String, Integer, String> {
-
-	private static String host = "192.168.1.149";
-	private static int port = 5000;
-	private static int HEADER_BYTE_COUNT = 4;
-
+    private float[] m_vertexData;
 	@Override
 	protected String doInBackground(String... params) {
 
         HttpClient httpclient = new DefaultHttpClient();
         HttpResponse response;
         try {
-            response = httpclient.execute(new HttpGet("http://larsendt.com:1234/?x=0&y=0"));
+            response = httpclient.execute(new HttpGet("http://larsendt.com:1234/?x=0&y=0&compression=no"));
         } catch (IOException e) {
             Log.d(MyGLRenderer.TAG, "HttpResponse broke...");
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -50,7 +50,6 @@ public class DataFetcher extends AsyncTask<String, Integer, String> {
             }
             String input_json = out.toString();
             Log.d(MyGLRenderer.TAG, "response is" + input_json);
-            input_json = input_json.substring(HEADER_BYTE_COUNT);
             return input_json;
         }
         else {
@@ -67,5 +66,89 @@ public class DataFetcher extends AsyncTask<String, Integer, String> {
 		return null;
 	}
 
-	
+    @Override
+    protected void onPostExecute(String json_string) {
+        JSONObject obj;
+        try {
+            obj = (JSONObject) new JSONTokener(json_string).nextValue();
+        } catch (JSONException e) {
+            Log.e(MyGLRenderer.TAG, "Parsing json failed");
+            e.printStackTrace();
+            return;
+        }
+
+        String type;
+        try {
+            type = obj.getString("type");
+        } catch(JSONException e) {
+            Log.e(MyGLRenderer.TAG, "JSON object didn't have 'type'");
+            e.printStackTrace();
+            return;
+        }
+
+        Log.d(MyGLRenderer.TAG, "Type was: " + type);
+        if(type.equals("chunk")) {
+            String chunk_string;
+            try {
+                chunk_string = obj.getString("vertex_data");
+            } catch(JSONException e) {
+                Log.e(MyGLRenderer.TAG, "JSON object didn't have vertex data");
+                e.printStackTrace();
+                return;
+            }
+
+            byte[] decoded_data = Base64.decode(chunk_string, 0);
+            String compression;
+            try {
+                compression = obj.getString("compression");
+            } catch(JSONException e) {
+                Log.d(MyGLRenderer.TAG, "JSON object didn't have compression flag, assuming no compression");
+                e.printStackTrace();
+                compression = "no";
+            }
+
+            if(compression == "yes") {
+                Inflater inf = new Inflater();
+                inf.setInput(decoded_data);
+                int inflated_size;
+                try {
+                    inflated_size = obj.getInt("inflated_size");
+                } catch(JSONException e) {
+                    Log.e(MyGLRenderer.TAG, "JSON object didn't have inflated size");
+                    e.printStackTrace();
+                    return;
+                }
+
+                byte[] decompressed_bytes = new byte[inflated_size];
+                int sz;
+                try {
+                    sz = inf.inflate(decompressed_bytes);
+                } catch(DataFormatException e) {
+                    Log.e(MyGLRenderer.TAG, "Failed to decompress vertex data");
+                    e.printStackTrace();
+                    return;
+                }
+                if(sz != inflated_size) {
+                    Log.e(MyGLRenderer.TAG, "Byte array decompressed to different size than expected");
+                }
+                decoded_data = decompressed_bytes;
+            }
+
+            ByteBuffer buf = ByteBuffer.wrap(decoded_data);
+            buf.order(ByteOrder.BIG_ENDIAN);
+            FloatBuffer vert_data = buf.asFloatBuffer();
+            m_vertexData = new float[decoded_data.length/4];
+
+            for(int i = 0; i < m_vertexData.length; i++) {
+                m_vertexData[i] = vert_data.get(i);
+            }
+        }
+        else {
+            Log.e(MyGLRenderer.TAG, "Got bad json data:" + json_string + "(type == " + type);
+        }
+    }
+
+	public float[] getVertexData() {
+        return m_vertexData;
+    }
 }

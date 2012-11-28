@@ -28,6 +28,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.Matrix;
+import android.os.AsyncTask;
 import android.util.Log;
 
 
@@ -36,6 +37,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public static final String TAG = "OO";
     private Shader shader;
     private VBO vbo;
+    private boolean m_hasChunk = false;
+    DataFetcher m_dataFetcher;
 
     private final String vertexShaderCode =
         // This matrix member variable provides a hook to manipulate
@@ -74,49 +77,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         checkGlError("Before vbo init");
         vbo = new VBO(shader.getProgram());
 
-        int divs = 20;
-        float vertices[] = new float[3*3*divs];
-        int indices[] = new int[3*divs];
-        int count = 0;
-        int icount = 0;
-        
-        for (int i = 0; i < divs; i ++){
-        	double ratio = i/((double)divs);
-        	double radians = ratio * 2.0 * Math.PI;
-	        vertices[count] = (float)Math.cos(radians);
-	        vertices[count+1] = (float)Math.sin(radians);
-	        vertices[count+2] = 0;
-	        count+=3;
-	        
-	        indices[icount] = icount;
-	        icount++;
-	        
-	        ratio = (i+1)/((double)divs);
-	        radians = ratio * 2.0 * Math.PI;
-	        vertices[count] = (float)Math.cos(radians);
-	        vertices[count+1] = (float)Math.sin(radians);
-	        vertices[count+2] = 0;
-	        count+=3;
-	        
-	        indices[icount] = icount;
-	        icount++;
-	        
-	        vertices[count] = 0;
-	        vertices[count+1] = 0;
-	        vertices[count+2] = 0;
-	        count+=3;
-	        
-	        indices[icount] = icount;
-	        icount++;
-        		
-        }
-        
-        
-        vbo.setBuffers(vertices, indices);
-        MyGLRenderer.checkGlError("vbo setBuffers");
+        m_dataFetcher = new DataFetcher();
+        m_dataFetcher.execute("banana");
     }
 
     public void onDrawFrame(GL10 unused) {
+
+        if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk) {
+            float[] vertex_data = m_dataFetcher.getVertexData();
+            int[] index_data = new int[vertex_data.length / 6];
+
+            for(int i = 0; i < index_data.length; i++) {
+                index_data[i] = i;
+            }
+
+            vbo.setBuffers(vertex_data, index_data);
+            MyGLRenderer.checkGlError("vbo setBuffers");
+            m_hasChunk = true;
+            Log.d(MyGLRenderer.TAG, "Vertex buffer complete");
+        }
 
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
