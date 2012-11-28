@@ -26,6 +26,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -63,10 +64,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame color
+    	
+    	Log.d(TAG, "Starting glstuff");
+    	
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
+        Log.d(TAG, Integer.toString(shader.getProgram()));
+        checkGlError("Before vbo init");
         vbo = new VBO(shader.getProgram());
-        
         float vertices[] = {
         		1,0,0,
         		0,1,0,
@@ -78,7 +83,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         };
         
         vbo.setBuffers(vertices, indices);
-        
+        MyGLRenderer.checkGlError("vbo setBuffers");
     }
 
     public void onDrawFrame(GL10 unused) {
@@ -90,10 +95,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mAngle, 0, 0, -1.0f);
 
         // Draw triangle
+        MyGLRenderer.checkGlError("start of draw");
         shader.setMatrices(mvMatrix, pMatrix);
+        MyGLRenderer.checkGlError("shader.setMatrices");
         shader.useProgram();
+        MyGLRenderer.checkGlError("shader.useProgram");
         vbo.draw();
-        checkGlError("glDrawElements");
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -125,8 +132,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public static void checkGlError(String glOperation) {
         int error;
         while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e(TAG, glOperation + ": glError " + error);
-            throw new RuntimeException(glOperation + ": glError " + error);
+            Log.e(TAG, glOperation + ": glError " + GLU.gluErrorString(error));
+            //throw new RuntimeException(glOperation + ": glError " + error);
         }
     }
 }

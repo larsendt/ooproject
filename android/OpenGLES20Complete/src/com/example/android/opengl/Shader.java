@@ -26,7 +26,6 @@ public class Shader {
 		GLES20.glAttachShader(program, fragmentShader); // add the fragment shader to program
 		GLES20.glLinkProgram(program);                  // create OpenGL program executables
 
-		
 	}
 	
 	public int getProgram()
@@ -65,7 +64,9 @@ public class Shader {
 	public void setMatrices(float[] mvMatrix, float[] pMatrix)
 	{
 		setUniformMatrix4fv("mvMatrix", mvMatrix);
+		MyGLRenderer.checkGlError("mvMatrix setmatrix");
 		setUniformMatrix4fv("pMatrix", pMatrix);
+		MyGLRenderer.checkGlError("pMatrix setmatrix");
 		
 	}
 	
@@ -79,7 +80,7 @@ public class Shader {
         // add the source code to the shader and compile it
         GLES20.glShaderSource(shaderProgram, shaderCode);
         GLES20.glCompileShader(shaderProgram);
-        
+        MyGLRenderer.checkGlError("compileShader");
         return shaderProgram;
 		
 	}

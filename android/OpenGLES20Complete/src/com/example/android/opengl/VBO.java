@@ -25,7 +25,7 @@ public class VBO {
     
     public VBO(int shaderprogram)
     {
-    	
+    	MyGLRenderer.checkGlError("VBO start");
     	program = shaderprogram;
     	
     	String attribute_name = "vertex";
@@ -33,12 +33,15 @@ public class VBO {
     	att_vertex = GLES20.glGetAttribLocation(program, attribute_name);
     	if (att_vertex == -1){
     	}
+    	MyGLRenderer.checkGlError("vertex glGetAttribLocation");
     	IntBuffer ib = IntBuffer.allocate(2);
     	
     	GLES20.glGenBuffers(2, ib);
     	vbo_vertices = ib.get();
     	
     	ibo_elements = ib.get();
+    	
+    	MyGLRenderer.checkGlError("glGenBuffers");
     	
     	
     	
@@ -59,6 +62,8 @@ public class VBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
+    	MyGLRenderer.checkGlError("glBindBuffer");
+    	
     	Log.d(MyGLRenderer.TAG, "setting vertex buffer data");
     	
     	GLES20.glBufferData(
@@ -67,6 +72,8 @@ public class VBO {
     			fb, 
     			GLES20.GL_STATIC_DRAW
     	);
+    	
+    	MyGLRenderer.checkGlError("glBufferData");
     	
     	IntBuffer ib = IntBuffer.allocate(indices.length);
     	
@@ -77,6 +84,8 @@ public class VBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
     	
+    	MyGLRenderer.checkGlError("glBindBuffer");
+    	
     	GLES20.glBufferData(
     			GLES20.GL_ELEMENT_ARRAY_BUFFER,
     			indices.length,
@@ -84,12 +93,22 @@ public class VBO {
     			GLES20.GL_STATIC_DRAW
     	);
     	
+    	MyGLRenderer.checkGlError("glBufferData");
+    	
     }
     
     public void draw()
     {
+    	MyGLRenderer.checkGlError("draw start");
+    	
     	GLES20.glEnableVertexAttribArray(att_vertex);
+    	
+    	MyGLRenderer.checkGlError("att_vertex glEnableVertexAttribArray");
+    	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
+    	
+    	MyGLRenderer.checkGlError("vbo_vertex glBindBuffer");
+    	
     	GLES20.glVertexAttribPointer(
     				att_vertex,
     				ELEMENTS_IN_VERTEX,
@@ -98,8 +117,11 @@ public class VBO {
     				0,
     				0
     	);
+    	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
+    	
+    	MyGLRenderer.checkGlError("glBindBuffer");
     	
     	int size;
     	IntBuffer ib = IntBuffer.allocate(1);
@@ -109,16 +131,20 @@ public class VBO {
     			ib
     	);
     	
+    	MyGLRenderer.checkGlError("glGetBufferParameteriv");
+    	
     	size = ib.get();
     	
     	GLES20.glDrawElements(
     			GLES20.GL_TRIANGLES,
-    			size/4, 
+    			size, 
     			GLES20.GL_UNSIGNED_INT, 
     			0
     	);
+    	MyGLRenderer.checkGlError("glDrawElements");
     	
     	GLES20.glDisableVertexAttribArray(att_vertex);
+    	MyGLRenderer.checkGlError("glDisableVertexAttribArray");
     	
     }
     
