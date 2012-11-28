@@ -49,26 +49,22 @@ public class VBO {
     
     public void setBuffers(float vertices[], int indices[])
     {
-    	Log.d(MyGLRenderer.TAG, "setting buffers");
     	FloatBuffer fb = FloatBuffer.allocate(vertices.length);
     	
-    	Log.d(MyGLRenderer.TAG, "Length of vertices is " + Integer.toString(vertices.length));
 
     	
     	fb.put(vertices);
     	fb.rewind();
     	
-    	Log.d(MyGLRenderer.TAG, "binding vertex buffer");
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
     	MyGLRenderer.checkGlError("glBindBuffer");
     	
-    	Log.d(MyGLRenderer.TAG, "setting vertex buffer data");
     	
     	GLES20.glBufferData(
     			GLES20.GL_ARRAY_BUFFER,
-    			vertices.length, 
+    			vertices.length * 4, 
     			fb, 
     			GLES20.GL_STATIC_DRAW
     	);
@@ -77,7 +73,6 @@ public class VBO {
     	
     	IntBuffer ib = IntBuffer.allocate(indices.length);
     	
-    	Log.d(MyGLRenderer.TAG, "Length of indices is " + Integer.toString(indices.length));
     	
     	ib.put(indices);
     	ib.rewind();
@@ -88,7 +83,7 @@ public class VBO {
     	
     	GLES20.glBufferData(
     			GLES20.GL_ELEMENT_ARRAY_BUFFER,
-    			indices.length,
+    			indices.length * 4,
     			ib,
     			GLES20.GL_STATIC_DRAW
     	);
@@ -136,7 +131,7 @@ public class VBO {
     	size = ib.get();
     	
     	GLES20.glDrawElements(
-    			GLES20.GL_TRIANGLES,
+    			GLES20.GL_POINTS,
     			size, 
     			GLES20.GL_UNSIGNED_INT, 
     			0

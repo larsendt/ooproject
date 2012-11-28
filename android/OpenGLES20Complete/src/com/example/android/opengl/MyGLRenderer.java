@@ -60,56 +60,55 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mvMatrix = new float[16];
 
     // Declare as volatile because we are updating it from another thread
-    public volatile float mAngle;
+    public volatile float mxAngle;
+    public volatile float myAngle;
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame color
     	
-    	Log.d(TAG, "Starting glstuff");
+    	Log.d(TAG, "==============\nStarting glstuff");
     	
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
-        Log.d(TAG, Integer.toString(shader.getProgram()));
         checkGlError("Before vbo init");
         vbo = new VBO(shader.getProgram());
 
-        int divs = 20;
-        float vertices[] = new float[3*3*divs];
-        int indices[] = new int[3*divs];
+        
+        int size = 30;
+        float vertices[] = new float[3 * 3*size * size];
+        int indices[] = new int[3 * size * size];
         int count = 0;
         int icount = 0;
         
-        for (int i = 0; i < divs; i ++){
-        	double ratio = i/((double)divs);
-        	double radians = ratio * 2.0 * Math.PI;
-	        vertices[count] = (float)Math.cos(radians);
-	        vertices[count+1] = (float)Math.sin(radians);
-	        vertices[count+2] = 0;
-	        count+=3;
-	        
-	        indices[icount] = icount;
-	        icount++;
-	        
-	        ratio = (i+1)/((double)divs);
-	        radians = ratio * 2.0 * Math.PI;
-	        vertices[count] = (float)Math.cos(radians);
-	        vertices[count+1] = (float)Math.sin(radians);
-	        vertices[count+2] = 0;
-	        count+=3;
-	        
-	        indices[icount] = icount;
-	        icount++;
-	        
-	        vertices[count] = 0;
-	        vertices[count+1] = 0;
-	        vertices[count+2] = 0;
-	        count+=3;
-	        
-	        indices[icount] = icount;
-	        icount++;
+        for (int i = 0; i < size; i ++){
+        	for (int j = 0; j < size; j++){
+        		vertices[count] = (i-size/2)*.1f;
+        		vertices[count + 1] = (j-size/2)*.1f;
+        		vertices[count + 2] = (float)Math.random();
+        		count+=3;
         		
+        		vertices[count] = ((i+1)-size/2)*.1f;
+        		vertices[count + 1] = (j-size/2)*.1f;
+        		vertices[count + 2] = (float)Math.random();
+        		count+=3;
+        		
+        		vertices[count] = ((i+1) - size/2)*.1f;
+        		vertices[count + 1] = ((j+1) - size/2)*.1f;
+        		vertices[count + 2] = (float)Math.random();
+        		count+=3;
+        		
+        		indices[icount] = icount;
+        		icount++;
+        		indices[icount] = icount;
+        		icount++;
+        		indices[icount] = icount;
+        		icount++;
+        	}
         }
+        
+        
+        
         
         
         vbo.setBuffers(vertices, indices);
@@ -123,17 +122,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         Matrix.setIdentityM(mvMatrix, 0);
         
+        
         Matrix.translateM(mvMatrix, 0, mvMatrix, 0, 0.0f,0.0f,-10.0f);
-        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mAngle, 0, 0, 1.0f);
+        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
+        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
+        
 
         // Draw triangle
-        MyGLRenderer.checkGlError("start of draw");
         shader.useProgram();
         
         shader.setMatrices(mvMatrix, pMatrix);
-        MyGLRenderer.checkGlError("shader.setMatrices");
         
-        MyGLRenderer.checkGlError("shader.useProgram");
         vbo.draw();
     }
 

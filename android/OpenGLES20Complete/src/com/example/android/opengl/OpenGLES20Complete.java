@@ -108,7 +108,8 @@ class MyGLSurfaceView extends GLSurfaceView {
                   dy = dy * -1 ;
                 }
 
-                mRenderer.mAngle += (dx + dy) * TOUCH_SCALE_FACTOR;  // = 180.0f / 320
+                mRenderer.mxAngle += (dy * Math.PI) * TOUCH_SCALE_FACTOR;  // = 180.0f / 320
+                mRenderer.myAngle += (dx * Math.PI) * TOUCH_SCALE_FACTOR;
                 requestRender();
         }
 
