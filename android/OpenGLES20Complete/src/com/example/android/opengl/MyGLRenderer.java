@@ -41,8 +41,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // This matrix member variable provides a hook to manipulate
         // the coordinates of the objects that use this vertex shader
         "uniform mat4 mvMatrix;" +
-        "uniform mat4 pMatrix" +
-        "attribute vec3 vertex" +
+        "uniform mat4 pMatrix;" +
+        "attribute vec3 vertex;" +
 
         "void main() {" +
         // the matrix must be included as a modifier of gl_Position

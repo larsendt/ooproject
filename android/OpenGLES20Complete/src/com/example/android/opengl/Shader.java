@@ -1,6 +1,7 @@
 package com.example.android.opengl;
 
 import android.opengl.GLES20;
+import android.util.Log;
 
 public class Shader {
 	
@@ -26,6 +27,10 @@ public class Shader {
 		GLES20.glAttachShader(program, fragmentShader); // add the fragment shader to program
 		GLES20.glLinkProgram(program);                  // create OpenGL program executables
 
+		Log.d(MyGLRenderer.TAG, "Vertex compo log" + GLES20.glGetShaderInfoLog(vertexShader));
+		Log.d(MyGLRenderer.TAG, "Fragment compo log" + GLES20.glGetShaderInfoLog(fragmentShader));
+		Log.d(MyGLRenderer.TAG, "Program compo log" + GLES20.glGetProgramInfoLog(program));
+		
 	}
 	
 	public int getProgram()
@@ -58,6 +63,9 @@ public class Shader {
 	public void setUniformMatrix4fv(String name, float values[])
 	{
 		int location = GLES20.glGetUniformLocation(program, name);
+		if (location == -1){
+			Log.d(MyGLRenderer.TAG, "Location for " + name + " is invalid");
+		}
 		GLES20.glUniformMatrix4fv(location, 1, false, values, 0);
 	}
 	
