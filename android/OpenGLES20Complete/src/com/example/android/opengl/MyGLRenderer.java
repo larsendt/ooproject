@@ -45,6 +45,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "attribute vec3 vertex;" +
 
         "void main() {" +
+        "	gl_PointSize = 5.0;" +
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1);" +
         "}";
@@ -72,20 +73,42 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Log.d(TAG, Integer.toString(shader.getProgram()));
         checkGlError("Before vbo init");
         vbo = new VBO(shader.getProgram());
-        
-        float vertices[] = new float[300];
-        int indices[] = new int[100];
+
+        int divs = 20;
+        float vertices[] = new float[3*3*divs];
+        int indices[] = new int[3*divs];
         int count = 0;
         int icount = 0;
-        for (int i = 0; i < 10; i ++){
-        	for (int j = 0; j < 10; j++){
-        		vertices[count] = (i-5)*.2f;
-        		vertices[count+1] = (j-5)*.2f;
-        		vertices[count+2] = 0;
-        		count+=3;
-        		indices[icount] = icount;
-        		icount++;
-        	}
+        
+        for (int i = 0; i < divs; i ++){
+        	double ratio = i/((double)divs);
+        	double radians = ratio * 2.0 * Math.PI;
+	        vertices[count] = (float)Math.cos(radians);
+	        vertices[count+1] = (float)Math.sin(radians);
+	        vertices[count+2] = 0;
+	        count+=3;
+	        
+	        indices[icount] = icount;
+	        icount++;
+	        
+	        ratio = (i+1)/((double)divs);
+	        radians = ratio * 2.0 * Math.PI;
+	        vertices[count] = (float)Math.cos(radians);
+	        vertices[count+1] = (float)Math.sin(radians);
+	        vertices[count+2] = 0;
+	        count+=3;
+	        
+	        indices[icount] = icount;
+	        icount++;
+	        
+	        vertices[count] = 0;
+	        vertices[count+1] = 0;
+	        vertices[count+2] = 0;
+	        count+=3;
+	        
+	        indices[icount] = icount;
+	        icount++;
+        		
         }
         
         
@@ -100,8 +123,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         Matrix.setIdentityM(mvMatrix, 0);
         
-        Matrix.translateM(mvMatrix, 0, mvMatrix, 0, 0.0f,0.0f,-1.0f);
-        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mAngle, 0, 0, -1.0f);
+        Matrix.translateM(mvMatrix, 0, mvMatrix, 0, 0.0f,0.0f,-10.0f);
+        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mAngle, 0, 0, 1.0f);
 
         // Draw triangle
         MyGLRenderer.checkGlError("start of draw");
