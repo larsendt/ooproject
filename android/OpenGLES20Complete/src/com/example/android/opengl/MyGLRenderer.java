@@ -72,15 +72,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Log.d(TAG, Integer.toString(shader.getProgram()));
         checkGlError("Before vbo init");
         vbo = new VBO(shader.getProgram());
-        float vertices[] = {
-        		1,0,0,
-        		0,1,0,
-        		1,-1,0
-        		
-        };
-        int indices[] = {
-        		1,2,3
-        };
+        
+        float vertices[] = new float[300];
+        int indices[] = new int[100];
+        int count = 0;
+        int icount = 0;
+        for (int i = 0; i < 10; i ++){
+        	for (int j = 0; j < 10; j++){
+        		vertices[count] = (i-5)*.2f;
+        		vertices[count+1] = (j-5)*.2f;
+        		vertices[count+2] = 0;
+        		count+=3;
+        		indices[icount] = icount;
+        		icount++;
+        	}
+        }
+        
         
         vbo.setBuffers(vertices, indices);
         MyGLRenderer.checkGlError("vbo setBuffers");
@@ -91,7 +98,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         
-        Matrix.translateM(mvMatrix, 0, mvMatrix, 0, 0.0f,0.0f,-10.0f);
+        Matrix.setIdentityM(mvMatrix, 0);
+        
+        Matrix.translateM(mvMatrix, 0, mvMatrix, 0, 0.0f,0.0f,-1.0f);
         Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mAngle, 0, 0, -1.0f);
 
         // Draw triangle
@@ -114,7 +123,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        Matrix.frustumM(pMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+        Matrix.setIdentityM(pMatrix, 0);
+        Matrix.perspectiveM(pMatrix, 0, 45, ratio, .1f,100);
 
     }
 
