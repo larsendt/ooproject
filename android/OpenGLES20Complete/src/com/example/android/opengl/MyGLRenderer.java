@@ -49,7 +49,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "attribute vec3 vertex;" +
 
         "void main() {" +
-        "	gl_PointSize = 2.0;" +
+        "	gl_PointSize = 3.0;" +
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
         "}";
@@ -89,10 +89,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk) {
             float[] vertex_data = m_dataFetcher.getVertexData();
-            Log.d(TAG, "Outputting vertices");
-            for (int i = 0; i < vertex_data.length; i +=6){
-            	Log.d(TAG, Float.toString(vertex_data[i]) + " | " + Float.toString(vertex_data[i+1]) + " | " + Float.toString(vertex_data[i+2]));
-            }
             
             int[] index_data = new int[vertex_data.length / 6];
 
