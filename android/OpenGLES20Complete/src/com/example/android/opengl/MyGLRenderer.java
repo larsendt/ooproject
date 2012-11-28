@@ -63,17 +63,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mvMatrix = new float[16];
 
     // Declare as volatile because we are updating it from another thread
-    public volatile float mAngle;
+    public volatile float mxAngle;
+    public volatile float myAngle;
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame color
     	
-    	Log.d(TAG, "Starting glstuff");
+    	Log.d(TAG, "==============\nStarting glstuff");
     	
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
-        Log.d(TAG, Integer.toString(shader.getProgram()));
         checkGlError("Before vbo init");
         vbo = new VBO(shader.getProgram());
 
@@ -102,17 +102,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         Matrix.setIdentityM(mvMatrix, 0);
         
+        
         Matrix.translateM(mvMatrix, 0, mvMatrix, 0, 0.0f,0.0f,-10.0f);
-        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mAngle, 0, 0, 1.0f);
+        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
+        Matrix.rotateM(mvMatrix, 0, mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
+        
 
         // Draw triangle
-        MyGLRenderer.checkGlError("start of draw");
         shader.useProgram();
         
         shader.setMatrices(mvMatrix, pMatrix);
-        MyGLRenderer.checkGlError("shader.setMatrices");
         
-        MyGLRenderer.checkGlError("shader.useProgram");
         vbo.draw();
     }
 
