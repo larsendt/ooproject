@@ -91,7 +91,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         int div = 100;
 
-        float scale = .05f;
+        float scale = .1f;
         
         int vcount = 0;
         int icount = 0;
@@ -101,8 +101,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float vals[][] = new float[div][div];
         
         for (int i = 0; i < div; i ++){
-        	for (int j = 0; j < div; j+=3){
-        		vals[i][j] = (float)Math.sin(i * j * .002) * .2f;
+        	for (int j = 0; j < div; j++){
+        		vals[i][j] = (float)Math.sin(i * j * .004) * .2f;
         	}
         }
 		for (int i = 0; i < div-1; i ++){
