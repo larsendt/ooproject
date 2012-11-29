@@ -72,6 +72,17 @@ public class Shader {
 		setUniformMatrix4fv("pMatrix", pMatrix);
 		MyGLRenderer.checkGlError("pMatrix setmatrix");
 		
+		
+	}
+	
+	public void setMatrices(float[] mvMatrix, float[] pMatrix, float[] nMatrix){
+		
+		setUniformMatrix4fv("mvMatrix", mvMatrix);
+		MyGLRenderer.checkGlError("mvMatrix setmatrix");
+		setUniformMatrix4fv("pMatrix", pMatrix);
+		MyGLRenderer.checkGlError("pMatrix setmatrix");
+		setUniformMatrix4fv("nMatrix", nMatrix);
+		MyGLRenderer.checkGlError("nMatrix setmatrix");
 	}
 	
 	

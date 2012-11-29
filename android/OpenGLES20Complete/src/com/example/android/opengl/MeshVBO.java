@@ -6,12 +6,13 @@ import java.nio.IntBuffer;
 import android.opengl.GLES20;
 import android.util.Log;
 
-public class VBO {
+public class MeshVBO {
 
     private int program;
-    private int vbo_vertices;
+    private int vbo_packages;
     private int ibo_elements;
     private int att_vertex;
+    private int att_normal;
     
     private static final int VERTEX_BYTE_SIZE = 12;
     private static final int INT_BYTE_SIZE = 4;
@@ -20,7 +21,7 @@ public class VBO {
     
     private int elements_length;
     
-    public VBO(int shaderprogram)
+    public MeshVBO(int shaderprogram)
     {
     	MyGLRenderer.checkGlError("VBO start");
     	program = shaderprogram;
@@ -30,11 +31,17 @@ public class VBO {
     	att_vertex = GLES20.glGetAttribLocation(program, attribute_name);
     	if (att_vertex == -1){
     	}
-    	MyGLRenderer.checkGlError("vertex glGetAttribLocation");
+    	
+    	attribute_name = "normal";
+    	
+    	att_normal = GLES20.glGetAttribLocation(program, attribute_name);
+    	if (att_normal == -1){
+    	}
+
     	IntBuffer ib = IntBuffer.allocate(2);
     	
     	GLES20.glGenBuffers(2, ib);
-    	vbo_vertices = ib.get();
+    	vbo_packages = ib.get();
     	
     	ibo_elements = ib.get();
     	
@@ -44,24 +51,30 @@ public class VBO {
     	
     }
     
-    public void setBuffers(float vertices[], int indices[])
+    public void setBuffers(float packages[], int indices[])
     {
-    	FloatBuffer fb = FloatBuffer.allocate(vertices.length);
+    	FloatBuffer fb = FloatBuffer.allocate(packages.length);
     	
 
-    	
-    	fb.put(vertices);
+    	//
+    	//
+    	// Packages Layout:
+    	// 	VERTEX: float,float,float
+    	//	NORMAL: float,float,float
+    	//
+    	//
+    	fb.put(packages);
     	fb.rewind();
     	
     	
-    	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
+    	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_packages);
     	
     	MyGLRenderer.checkGlError("glBindBuffer");
     	
     	
     	GLES20.glBufferData(
     			GLES20.GL_ARRAY_BUFFER,
-    			vertices.length * FLOAT_BYTE_SIZE, 
+    			packages.length * FLOAT_BYTE_SIZE, 
     			fb, 
     			GLES20.GL_STATIC_DRAW
     	);
@@ -93,25 +106,32 @@ public class VBO {
     
     public void draw()
     {
-    	MyGLRenderer.checkGlError("draw start");
     	
     	GLES20.glEnableVertexAttribArray(att_vertex);
     	
-    	MyGLRenderer.checkGlError("att_vertex glEnableVertexAttribArray");
-    	
-    	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
-    	
-    	MyGLRenderer.checkGlError("vbo_vertex glBindBuffer");
+    	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_packages);
     	
     	GLES20.glVertexAttribPointer(
     				att_vertex,
     				ELEMENTS_IN_VERTEX,
     				GLES20.GL_FLOAT,
     				false,
-    				0,
+    				FLOAT_BYTE_SIZE * 3,
     				0
     	);
-    	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
+    	
+    	GLES20.glEnableVertexAttribArray(att_normal);
+    	
+    	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_packages);
+    	
+    	GLES20.glVertexAttribPointer(
+    				att_normal,
+    				ELEMENTS_IN_VERTEX,
+    				GLES20.GL_FLOAT,
+    				false,
+    				FLOAT_BYTE_SIZE * 3,
+    				FLOAT_BYTE_SIZE * 3
+    	);
     	
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
@@ -133,4 +153,3 @@ public class VBO {
     }
     
 }
-

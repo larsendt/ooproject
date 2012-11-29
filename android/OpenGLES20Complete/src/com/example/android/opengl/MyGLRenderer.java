@@ -16,11 +16,13 @@
 
 package com.example.android.opengl;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
+import java.util.Stack;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -37,7 +39,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public static final String TAG = "OO";
     private Shader shader;
-    private VBO vbo;
+    private MeshVBO vbo;
     private boolean m_hasChunk = false;
     //DataFetcher m_dataFetcher;
 
@@ -47,25 +49,33 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "uniform mat4 mvMatrix;" +
         "uniform mat4 pMatrix;" +
         "attribute vec3 vertex;" +
-        "varying float height;" +
+        "attribute vec3 normal;" +
+        "varying float light;" +
 
         "void main() {" +
         "	gl_PointSize = 3.0;" +
-        "	height = vertex.y;" +
+        "	light = dot(normalize(vec3(1.0,1.0,1.0)), normalize(normal));" +
+        
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
         "}";
 
     private final String fragmentShaderCode =
         "precision mediump float;" +
-        "varying float height;" +
+        "varying float light;" +
         "void main() {" +
-        "  gl_FragColor = vec4(height*10.0,height*5.0,1.0-abs(height*2.0 + .1),1);" +
+        
+        "  gl_FragColor = vec4(vec3(light),1);" +
         "}";
     
     private float[] pMatrix = new float[16];
     private float[] mvMatrix = new float[16];
+    private float[] nMatrix = new float[16];
     private float[] tmpMatrix = new float[16];
+    
+    private Stack<float[]> projectionStack = new Stack<float[]>();
+    private Stack<float[]> modelviewStack = new Stack<float[]>();
+    
     // Declare as volatile because we are updating it from another thread
     public volatile float mxAngle;
     public volatile float myAngle;
@@ -80,7 +90,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
         checkGlError("Before vbo init");
-        vbo = new VBO(shader.getProgram());
+        vbo = new MeshVBO(shader.getProgram());
 
         
         //m_dataFetcher = new DataFetcher();
@@ -89,14 +99,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.setIdentityM(pMatrix, 0);
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
         
-        int div = 100;
+        int div =100;
 
         float scale = .1f;
         
         int vcount = 0;
         int icount = 0;
         
-        float vertices[] = new float[3*4*div*div];
+        float packages[] = new float[6*4*div*div];
         int indices[] = new int[6*div*div];
         float vals[][] = new float[div][div];
         
@@ -113,36 +123,80 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         		float x = (i-div/2) * scale;
         		float z = (j-div/2) * scale;
         		
+        		float normal[] = {0,0,0};
+        		
+        		float va[] = {
+        				i*scale,
+        				vals[i][j],
+        				j*scale
+        		};
+        		
+        		float vb[] = {
+        				(i+1)*scale,
+        				vals[i+1][j],
+        				(j) * scale
+        		};
+        		
+        		float vc[] = {
+        				(i)*scale,
+        				vals[i][j+1],
+        				(j+1) * scale
+        		};
+        		
+        		for (int k = 0; k < 3; k++){
+        			vb[k] -= va[k];
+        			vc[k] -= va[k];
+        		}
+        		
+        		normal[0] = (vc[1] * vb[2]) - (vc[2]*  vb[1]);
+        		normal[1] = (vc[2]*  vb[0]) - (vc[0] * vb[2]);
+        		normal[2] = (vc[0] * vb[1]) - (vc[1] * vb[0]);
+        		
         		tl = vcount/3;
         		
-        		vertices[vcount] = x;
-        		vertices[vcount+1] = vals[i][j];
-        		vertices[vcount+2] = z;
+        		//vertex
         		
+        		packages[vcount] = x;
+        		packages[vcount+1] = vals[i][j];
+        		packages[vcount+2] = z;
+        		vcount +=3;
+        		
+        		//normal
+        		
+        		packages[vcount] = normal[0]; packages[vcount+1] = normal[1]; packages[vcount+2] = normal[2];
         		vcount +=3;
         		
         		br = vcount/3;
         		
-        		vertices[vcount] = x+1*scale;
-        		vertices[vcount+1] = vals[i+1][j+1];
-        		vertices[vcount+2] = z+1*scale;
+        		packages[vcount] = x+1*scale;
+        		packages[vcount+1] = vals[i+1][j+1];
+        		packages[vcount+2] = z+1*scale;
         		
+        		vcount +=3;
+        		
+        		packages[vcount] = normal[0]; packages[vcount+1] = normal[1]; packages[vcount+2] = normal[2];
         		vcount +=3;
         		
         		bl = vcount/3;
         		
-        		vertices[vcount] = x;
-        		vertices[vcount+1] = vals[i][j+1];
-        		vertices[vcount+2] = z+1*scale;
+        		packages[vcount] = x;
+        		packages[vcount+1] = vals[i][j+1];
+        		packages[vcount+2] = z+1*scale;
         		
+        		vcount +=3;
+        		
+        		packages[vcount] = normal[0]; packages[vcount+1] = normal[1]; packages[vcount+2] = normal[2];
         		vcount +=3;
         		
         		tr = vcount/3;
         		
-        		vertices[vcount] = x+1*scale;
-        		vertices[vcount+1] = vals[i+1][j];
-        		vertices[vcount+2] = z;
+        		packages[vcount] = x+1*scale;
+        		packages[vcount+1] = vals[i+1][j];
+        		packages[vcount+2] = z;
         		
+        		vcount +=3;
+        		
+        		packages[vcount] = normal[0]; packages[vcount+1] = normal[1]; packages[vcount+2] = normal[2];
         		vcount +=3;
         		
         		indices[icount] = tl;
@@ -167,7 +221,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
       
         
-        vbo.setBuffers(vertices, indices);
+        vbo.setBuffers(packages, indices);
         
     }
 
@@ -193,6 +247,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         Matrix.setIdentityM(mvMatrix, 0);
         
+        pushMVMatrix();
+        
         Matrix.translateM(mvMatrix, 0, 0.0f,0.0f, -5.0f);
         
         Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
@@ -206,6 +262,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         shader.setMatrices(mvMatrix, pMatrix);
         
         vbo.draw();
+        
+        popMVMatrix();
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -242,5 +300,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Log.e(TAG, glOperation + ": glError " + GLU.gluErrorString(error));
             //throw new RuntimeException(glOperation + ": glError " + error);
         }
+    }
+    
+    private void pushMVMatrix(){
+    	modelviewStack.push(mvMatrix);
+    }
+    
+    private void popMVMatrix(){
+    	mvMatrix = Arrays.copyOf(modelviewStack.pop(), 16);
+    }
+    
+    private void pushPMatrix(){
+    	projectionStack.push(pMatrix);
+    }
+    private void popPMatrix(){
+    	pMatrix = Arrays.copyOf(projectionStack.pop(), 16);
     }
 }
