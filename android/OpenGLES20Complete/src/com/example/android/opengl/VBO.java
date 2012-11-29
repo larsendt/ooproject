@@ -18,6 +18,7 @@ public class VBO {
     
     private static final int VERTEX_BYTE_SIZE = 12;
     private static final int INT_BYTE_SIZE = 4;
+    private static final int FLOAT_BYTE_SIZE = 4;
     private static final int ELEMENTS_IN_VERTEX = 3;
     
     private int elements_length;
@@ -63,7 +64,7 @@ public class VBO {
     	
     	GLES20.glBufferData(
     			GLES20.GL_ARRAY_BUFFER,
-    			vertices.length * 4, 
+    			vertices.length * FLOAT_BYTE_SIZE, 
     			fb, 
     			GLES20.GL_STATIC_DRAW
     	);
@@ -82,7 +83,7 @@ public class VBO {
     	
     	GLES20.glBufferData(
     			GLES20.GL_ELEMENT_ARRAY_BUFFER,
-    			indices.length * 4,
+    			indices.length * INT_BYTE_SIZE,
     			ib,
     			GLES20.GL_STATIC_DRAW
     	);
@@ -110,7 +111,7 @@ public class VBO {
     				ELEMENTS_IN_VERTEX,
     				GLES20.GL_FLOAT,
     				false,
-    				12,
+    				0,
     				0
     	);
     	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
@@ -122,14 +123,14 @@ public class VBO {
     	
     	
     	GLES20.glDrawElements(
-    			GLES20.GL_POINTS,
+    			GLES20.GL_TRIANGLES,
     			elements_length, 
     			GLES20.GL_UNSIGNED_INT, 
     			0
     	);
     	MyGLRenderer.checkGlError("glDrawElements");
     	
-    	GLES20.glDisableVertexAttribArray(att_vertex);
+    	//GLES20.glDisableVertexAttribArray(att_vertex);
     	MyGLRenderer.checkGlError("glDisableVertexAttribArray");
     	
     }

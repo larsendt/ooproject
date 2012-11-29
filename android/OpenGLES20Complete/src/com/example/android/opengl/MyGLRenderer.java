@@ -39,7 +39,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Shader shader;
     private VBO vbo;
     private boolean m_hasChunk = false;
-    DataFetcher m_dataFetcher;
+    //DataFetcher m_dataFetcher;
 
     private final String vertexShaderCode =
         // This matrix member variable provides a hook to manipulate
@@ -47,17 +47,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "uniform mat4 mvMatrix;" +
         "uniform mat4 pMatrix;" +
         "attribute vec3 vertex;" +
+        "varying float height;" +
 
         "void main() {" +
         "	gl_PointSize = 3.0;" +
+        "	height = vertex.y;" +
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
         "}";
 
     private final String fragmentShaderCode =
         "precision mediump float;" +
+        "varying float height;" +
         "void main() {" +
-        "  gl_FragColor = vec4(1,1,1,1);" +
+        "  gl_FragColor = vec4(height*10.0,height*5.0,1.0-abs(height*2.0 + .1),1);" +
         "}";
     
     private float[] pMatrix = new float[16];
@@ -74,20 +77,103 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     	Log.d(TAG, "==============\nStarting glstuff");
     	
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
         checkGlError("Before vbo init");
         vbo = new VBO(shader.getProgram());
 
-        m_dataFetcher = new DataFetcher();
-        m_dataFetcher.execute("banana");
+        
+        //m_dataFetcher = new DataFetcher();
+        //m_dataFetcher.execute("banana");
         
         Matrix.setIdentityM(pMatrix, 0);
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
+        
+        int div = 100;
+
+        float scale = .05f;
+        
+        int vcount = 0;
+        int icount = 0;
+        
+        float vertices[] = new float[3*4*div*div];
+        int indices[] = new int[6*div*div];
+        float vals[][] = new float[div][div];
+        
+        for (int i = 0; i < div; i ++){
+        	for (int j = 0; j < div; j+=3){
+        		vals[i][j] = (float)Math.sin(i * j * .002) * .2f;
+        	}
+        }
+		for (int i = 0; i < div-1; i ++){
+        	for (int j = 0; j < div-1; j++){
+        		
+        		int tl, tr, bl, br;
+        		
+        		float x = (i-div/2) * scale;
+        		float z = (j-div/2) * scale;
+        		
+        		tl = vcount/3;
+        		
+        		vertices[vcount] = x;
+        		vertices[vcount+1] = vals[i][j];
+        		vertices[vcount+2] = z;
+        		
+        		vcount +=3;
+        		
+        		br = vcount/3;
+        		
+        		vertices[vcount] = x+1*scale;
+        		vertices[vcount+1] = vals[i+1][j+1];
+        		vertices[vcount+2] = z+1*scale;
+        		
+        		vcount +=3;
+        		
+        		bl = vcount/3;
+        		
+        		vertices[vcount] = x;
+        		vertices[vcount+1] = vals[i][j+1];
+        		vertices[vcount+2] = z+1*scale;
+        		
+        		vcount +=3;
+        		
+        		tr = vcount/3;
+        		
+        		vertices[vcount] = x+1*scale;
+        		vertices[vcount+1] = vals[i+1][j];
+        		vertices[vcount+2] = z;
+        		
+        		vcount +=3;
+        		
+        		indices[icount] = tl;
+        		icount++;
+        		indices[icount] = tr;
+        		icount++;
+        		indices[icount] = br;
+        		icount++;
+        		
+        		indices[icount] = tl;
+        		icount++;
+        		indices[icount] = bl;
+        		icount++;
+        		indices[icount] = br;
+        		icount++;
+        		
+        		
+        	}
+        	
+        }
+        
+        
+      
+        
+        vbo.setBuffers(vertices, indices);
+        
     }
 
     public void onDrawFrame(GL10 unused) {
 
-        if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk) {
+        /*if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk ) {
             float[] vertex_data = m_dataFetcher.getVertexData();
             
             int[] index_data = new int[vertex_data.length / 6];
@@ -100,19 +186,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             MyGLRenderer.checkGlError("vbo setBuffers");
             m_hasChunk = true;
             Log.d(MyGLRenderer.TAG, "Vertex buffer complete");
-        }
+        }*/
 
         // Draw background color
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         
         Matrix.setIdentityM(mvMatrix, 0);
         
         Matrix.translateM(mvMatrix, 0, 0.0f,0.0f, -5.0f);
         
-        Matrix.rotateM(mvMatrix, 0, -mxAngle, 1.0f, 0.0f, 0.0f);
+        Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
         Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
         
-        Matrix.translateM(mvMatrix, 0, -2.0f,0f, -1.0f);
+        //Matrix.translateM(mvMatrix, 0, -2.0f,0f, -1.0f);
         
         // Draw triangle
         shader.useProgram();
