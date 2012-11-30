@@ -7,9 +7,9 @@ def worldGen(x,y):
     rval = simplex.noise2(y*.05,x*.05)
 
 
-    hval = simplex.noise2((y+50)*.05, (x+10)*.05)
+    hval = simplex.noise2((y+50)*.1, (x+10)*.1)
 
-    nval = simplex.noise2(x*.005, y*.005)
+    nval = simplex.noise2(x*.1, y*.1)
 
     val = tval*.6+rval*.1+hval*.3 + nval
     
