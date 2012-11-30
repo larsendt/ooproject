@@ -17,6 +17,8 @@ import json
 import base64
 import struct
 
+
+
 def get_chunk_data(x, y, host, port):
         print "requesting chunk (%d, %d) from host %s:%d" % (x, y, host, port)
 
@@ -163,6 +165,8 @@ class GLWrapper(object):
             
     
 def main(argv):
+    arg_hostname = "larsendt.com"
+    arg_port = 1234
     print "Initializing OpenGL..."
     if (len(argv) == 3):
         arg_hostname = argv[1]

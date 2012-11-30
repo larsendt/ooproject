@@ -15,7 +15,7 @@ class ChunkGenerator(object):
             for j in range(self.dimensions):
                 xval = (x + i) * (float(self.size) / self.dimensions)
                 zval = (z + j) * (float(self.size) / self.dimensions)
-                h = p.noise2(xval, zval)
+                h = p.noise2(xval, zval)*.1 + p.noise2((xval+5)*3, (zval+10)*3)*.2
                 arr.append(vector.Vec3(xval, h, zval))
             vertices.append(arr)
         
@@ -38,7 +38,7 @@ class ChunkGenerator(object):
             v1 = vertices[x][z+1]
             v2 = vertices[x+1][z+1]
             v3 = vertices[x+1][z]
-            triangles.append(triangle.Triangle(v1, v2, v3))
+            triangles.append(triangle.Triangle(v3, v2, v1))
 
         return chunk.Chunk(triangles, x=x, y=z) 
 
