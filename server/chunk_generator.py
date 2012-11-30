@@ -28,7 +28,7 @@ class ChunkGenerator(object):
             for j in range(self.dimensions):
                 xval = (x + i) * (float(self.size) / self.dimensions)
                 zval = (z + j) * (float(self.size) / self.dimensions)
-                h = worldGen
+                h = worldGen(x,z)
                 arr.append(vector.Vec3(xval, h, zval))
             vertices.append(arr)
         
