@@ -41,7 +41,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Shader shader;
     private MeshVBO vbo;
     private boolean m_hasChunk = false;
-    //DataFetcher m_dataFetcher;
+    DataFetcher m_dataFetcher;
 
     private final String vertexShaderCode =
         // This matrix member variable provides a hook to manipulate
@@ -93,13 +93,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         vbo = new MeshVBO(shader.getProgram());
 
         
-        //m_dataFetcher = new DataFetcher();
-        //m_dataFetcher.execute("banana");
+        m_dataFetcher = new DataFetcher();
+        m_dataFetcher.execute("banana");
         
         Matrix.setIdentityM(pMatrix, 0);
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
         
-        int div =100;
+        /*int div =100;
 
         float scale = .1f;
         
@@ -221,26 +221,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
       
         
-        vbo.setBuffers(packages, indices);
+        vbo.setBuffers(packages, indices);         */
         
     }
 
     public void onDrawFrame(GL10 unused) {
 
-        /*if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk ) {
+        if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk ) {
             float[] vertex_data = m_dataFetcher.getVertexData();
-            
+
             int[] index_data = new int[vertex_data.length / 6];
 
-            for(int i = 0; i < index_data.length; i+=2) {
-                index_data[i] = i;
+            for(int i = 0; i < index_data.length; i++) {
+                index_data[i] = i*2;
             }
 
             vbo.setBuffers(vertex_data, index_data);
             MyGLRenderer.checkGlError("vbo setBuffers");
             m_hasChunk = true;
             Log.d(MyGLRenderer.TAG, "Vertex buffer complete");
-        }*/
+        }
 
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);

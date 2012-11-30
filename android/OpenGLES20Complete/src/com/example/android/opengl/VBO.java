@@ -12,6 +12,7 @@ public class VBO {
     private int vbo_vertices;
     private int ibo_elements;
     private int att_vertex;
+    private int att_normal;
     
     private static final int VERTEX_BYTE_SIZE = 12;
     private static final int INT_BYTE_SIZE = 4;
@@ -31,8 +32,13 @@ public class VBO {
     	if (att_vertex == -1){
     	}
     	MyGLRenderer.checkGlError("vertex glGetAttribLocation");
-    	IntBuffer ib = IntBuffer.allocate(2);
-    	
+
+        att_normal = GLES20.glGetAttribLocation(program, "normal");
+        if(att_normal == -1) {
+        }
+        MyGLRenderer.checkGlError("normal glGetAttribLocation");
+
+        IntBuffer ib = IntBuffer.allocate(2);
     	GLES20.glGenBuffers(2, ib);
     	vbo_vertices = ib.get();
     	
@@ -96,8 +102,10 @@ public class VBO {
     	MyGLRenderer.checkGlError("draw start");
     	
     	GLES20.glEnableVertexAttribArray(att_vertex);
-    	
-    	MyGLRenderer.checkGlError("att_vertex glEnableVertexAttribArray");
+        MyGLRenderer.checkGlError("att_vertex glEnableVertexAttribArray");
+        GLES20.glEnableVertexAttribArray(att_normal);
+        MyGLRenderer.checkGlError("att_normal glEnableVertexAttribArray");
+
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
@@ -108,11 +116,21 @@ public class VBO {
     				ELEMENTS_IN_VERTEX,
     				GLES20.GL_FLOAT,
     				false,
-    				0,
+    				3,
     				0
     	);
     	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
-    	
+
+        GLES20.glVertexAttribPointer(
+                att_normal,
+                3,
+                GLES20.GL_FLOAT,
+                false,
+                3,
+                3
+        );
+        MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
+
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
     	MyGLRenderer.checkGlError("glBindBuffer");
