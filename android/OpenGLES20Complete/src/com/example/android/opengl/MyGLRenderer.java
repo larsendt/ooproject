@@ -65,7 +65,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "varying float light;" +
         "void main() {" +
         
-        "  gl_FragColor = vec4(vec3(light),1);" +
+        "  gl_FragColor = vec4(vec3(light+.5),1);" +
         "}";
     
     private float[] pMatrix = new float[16];

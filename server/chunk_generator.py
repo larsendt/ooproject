@@ -1,5 +1,7 @@
 import chunk, perlin, triangle, vector
 
+simplex = perlin.SimplexNoise()
+
 def worldGen(x,y):
     tval = simplex.noise2((x-20)*.05 ,(y+50)*.05)
     rval = simplex.noise2(y*.05,x*.05)
