@@ -1,5 +1,18 @@
 import chunk, perlin, triangle, vector
 
+def worldGen(x,y):
+    tval = simplex.noise2((x-20)*.05 ,(y+50)*.05)
+    rval = simplex.noise2(y*.05,x*.05)
+
+
+    hval = simplex.noise2((y+50)*.05, (x+10)*.05)
+
+    nval = simplex.noise2(x*.005, y*.005)
+
+    val = tval*.6+rval*.1+hval*.3 + nval
+    
+    return val
+
 class ChunkGenerator(object):
     def __init__(self, dimensions = 10, size = 1):
         self.size = size
@@ -15,7 +28,7 @@ class ChunkGenerator(object):
             for j in range(self.dimensions):
                 xval = (x + i) * (float(self.size) / self.dimensions)
                 zval = (z + j) * (float(self.size) / self.dimensions)
-                h = p.noise2(xval, zval)*.1 + p.noise2((xval+5)*3, (zval+10)*3)*.2
+                h = worldGen
                 arr.append(vector.Vec3(xval, h, zval))
             vertices.append(arr)
         
