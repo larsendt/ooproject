@@ -1,33 +1,33 @@
 import chunk, perlin, triangle, vector
 
 class ChunkGenerator(object):
-    def __init__(self, dimensions = 10, size = 1):
+    def __init__(self, resolution = 10, size = 1):
         self.size = size
-        self.dimensions = dimensions
+        self.resolution = resolution
 
     def generate_chunk(self, x, z):
         p = perlin.SimplexNoise()
 
         # generate the initial heightmap
         vertices = []
-        for i in range(self.dimensions):
+        for i in range(self.resolution):
             arr = []
-            for j in range(self.dimensions):
-                xval = (x + i) * (float(self.size) / self.dimensions)
-                zval = (z + j) * (float(self.size) / self.dimensions)
+            for j in range(self.resolution):
+                xval = (x + i) * (float(self.size) / self.resolution)
+                zval = (z + j) * (float(self.size) / self.resolution)
                 h = p.noise2(xval, zval)*.1 + p.noise2((xval+5)*3, (zval+10)*3)*.2
                 arr.append(vector.Vec3(xval, h, zval))
             vertices.append(arr)
         
         # split the heightmap into triangles
         triangles = []
-        tricount = ((self.dimensions - 1) ** 2) * 2
+        tricount = ((self.resolution - 1) ** 2) * 2
 
         for i in range(tricount):
-            x = i % self.dimensions
-            z = i / self.dimensions
+            x = i % self.resolution
+            z = i / self.resolution
 
-            if (x >= (self.dimensions-1)) or (z >= (self.dimensions-1)):
+            if (x >= (self.resolution-1)) or (z >= (self.resolution-1)):
                 continue
 
             v1 = vertices[x][z]
