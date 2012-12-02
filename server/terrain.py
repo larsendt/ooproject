@@ -9,8 +9,9 @@ class Terrain(object):
         self.conf = config.Config("terrain_server.conf")
         self.res = self.conf.get("chunk_resolution", default_value=50, save_default=True)
         self.size = self.conf.get("chunk_size", default_value=1, save_default=True)
+        self.cache_size = self.conf.get("cache_size", default_value=1e9, save_default=True)
         self.cg = chunk_generator.ChunkGenerator(resolution = self.res, size = self.size)
-        self.cache = filecache.Cache("terrain_cache", "terrain_server")
+        self.cache = filecache.Cache("terrain_cache", "terrain_server", self.cache_size)
 
     def get_response_for(self, x, y):
         if (x, y, self.res, self.size) in self.cache:
