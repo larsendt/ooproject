@@ -22,10 +22,10 @@ def drop_lru(directory, max_size):
         oldest_file = None
 
         for f in os.listdir(directory):
-            if (!oldest_file) or (os.path.getmtime(os.path.join(directory+oldest_file)) > os.path.getmtime(os.path.join(directory+f))):
+            if (oldest_file is None) or (os.path.getmtime(os.path.join(directory, oldest_file)) > os.path.getmtime(os.path.join(directory, f))):
                 oldest_file = f
 
-        print "dropped %s from the cache, total size is now %d KB" % (os.path.join(directory, oldest_file), get_size(directory))
+        print "dropped %s from the cache, total size is now %d KB" % (os.path.join(directory, oldest_file), get_size(directory)/1000.0)
         os.remove(os.path.join(directory, oldest_file))
 
 class Cache(object):
