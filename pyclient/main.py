@@ -40,7 +40,7 @@ def get_chunk_data(x, y, host, port):
             return base64.b64decode(obj["vertex_data"])
 
 class GLWrapper(object):
-    def __init__(self, hostname, port):
+    def __init__(self, hostname, port, x, y):
         #glutInit(len(sys.argv), sys.argv)
         glutInit(1, sys.argv[0])
         glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE)
@@ -72,7 +72,7 @@ class GLWrapper(object):
         self.yrotation = 0
         self.light_rotation = 0
 
-        data = get_chunk_data(0, 0, hostname, port)
+        data = get_chunk_data(x, y, hostname, port)
         vertex_data = struct.unpack(">%df" % (len(data)/4), data)
         #self.vbo = vertex_buffer.VertexBuffer(vertex_data)
         self.disp_list00 = display_list.DisplayList(vertex_data)
@@ -168,14 +168,17 @@ def main(argv):
     arg_hostname = "larsendt.com"
     arg_port = 1234
     print "Initializing OpenGL..."
-    if (len(argv) == 3):
+    if (len(argv) == 5):
         arg_hostname = argv[1]
         arg_port = int(argv[2])
+        arg_x = int(argv[3])
+        arg_y = int(argv[4])
         print "Host: %s:%d" % (arg_hostname, arg_port)
     else:
-        print "Usage: %s <hostname> <port>" % argv[0]
+        print "Usage: %s <hostname> <port> <x> <y>" % argv[0]
+        return
     
-    gl_wrapper = GLWrapper(arg_hostname, arg_port)
+    gl_wrapper = GLWrapper(arg_hostname, arg_port, arg_x, arg_y)
     gl_wrapper.begin()
         
     
