@@ -18,10 +18,6 @@ class Triangle(object):
         self.facenormal = n#v1.cross(v2)
         self.vertices = [v1, v2, v3]
         self.normals = [self.facenormal, self.facenormal, self.facenormal]
-        
-        txa = 
-
-        self.txcoords
 
 
     def serial_data(self):

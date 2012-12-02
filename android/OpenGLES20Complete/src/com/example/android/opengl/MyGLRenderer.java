@@ -110,7 +110,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
         
         
-        Bitmap tex = BitmapFactory.decodeFile("assets/file.png");
+        Bitmap tex = BitmapFactory.decodeFile("assets/file.jpg");
         
         ByteBuffer pix_buf = ByteBuffer.allocate(tex.getByteCount());
         
