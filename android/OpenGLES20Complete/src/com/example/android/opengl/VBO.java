@@ -13,11 +13,14 @@ public class VBO {
     private int ibo_elements;
     private int att_vertex;
     private int att_normal;
+    private int att_txcoord;
     
     private static final int VERTEX_BYTE_SIZE = 12;
     private static final int INT_BYTE_SIZE = 4;
     private static final int FLOAT_BYTE_SIZE = 4;
     private static final int ELEMENTS_IN_VERTEX = 3;
+    private static final int ELEMENTS_IN_TXCOORD = 2;
+    private static final int ELEMENTS_IN_PACKAGE = 8;
     
     private int elements_length;
     
@@ -38,6 +41,11 @@ public class VBO {
         }
         MyGLRenderer.checkGlError("normal glGetAttribLocation");
 
+        att_txcoord = GLES20.glGetAttribLocation(program, "txcoord");
+        if(att_txcoord == -1) {
+        }
+        MyGLRenderer.checkGlError("normal glGetAttribLocation");
+        
         IntBuffer ib = IntBuffer.allocate(2);
     	GLES20.glGenBuffers(2, ib);
     	vbo_vertices = ib.get();
@@ -102,9 +110,8 @@ public class VBO {
     	MyGLRenderer.checkGlError("draw start");
     	
     	GLES20.glEnableVertexAttribArray(att_vertex);
-        MyGLRenderer.checkGlError("att_vertex glEnableVertexAttribArray");
         GLES20.glEnableVertexAttribArray(att_normal);
-        MyGLRenderer.checkGlError("att_normal glEnableVertexAttribArray");
+        GLES20.glEnableVertexAttribArray(att_txcoord);
 
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
@@ -116,18 +123,28 @@ public class VBO {
     				ELEMENTS_IN_VERTEX,
     				GLES20.GL_FLOAT,
     				false,
-    				3,
+    				ELEMENTS_IN_PACKAGE,
     				0
     	);
     	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
 
         GLES20.glVertexAttribPointer(
                 att_normal,
-                3,
+                ELEMENTS_IN_VERTEX,
                 GLES20.GL_FLOAT,
                 false,
-                3,
+                ELEMENTS_IN_PACKAGE,
                 3
+        );
+        MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
+        
+        GLES20.glVertexAttribPointer(
+                att_txcoord,
+                ELEMENTS_IN_TXCOORD,
+                GLES20.GL_FLOAT,
+                false,
+                ELEMENTS_IN_PACKAGE,
+                6
         );
         MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
 

@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
 import java.util.Stack;
@@ -27,6 +28,8 @@ import java.util.Stack;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
@@ -50,7 +53,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "uniform mat4 pMatrix;" +
         "attribute vec3 vertex;" +
         "attribute vec3 normal;" +
+        "attribute vec2 txcoord;" +
         "varying float light;" +
+        "varying vec2 f_txcoord;" +
 
         "void main() {" +
         "	gl_PointSize = 3.0;" +
@@ -62,10 +67,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private final String fragmentShaderCode =
         "precision mediump float;" +
+        "uniform sampler2D tex;" +
         "varying float light;" +
+        "varying vec2 f_txcoord;" +
         "void main() {" +
-        
-        "  gl_FragColor = vec4(vec3(light+.5),1);" +
+        "	vec4 color = texture2D(tex, f_txcoord);" +
+        "	gl_FragColor = vec4(vec3(vec3(color)*light + .2), 1));" +
         "}";
     
     private float[] pMatrix = new float[16];
@@ -76,9 +83,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Stack<float[]> projectionStack = new Stack<float[]>();
     private Stack<float[]> modelviewStack = new Stack<float[]>();
     
+    private int texture;
+    
     // Declare as volatile because we are updating it from another thread
     public volatile float mxAngle;
     public volatile float myAngle;
+    
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
@@ -99,138 +109,50 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.setIdentityM(pMatrix, 0);
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
         
-        /*int div =100;
-
-        float scale = .1f;
         
-        int vcount = 0;
-        int icount = 0;
+        Bitmap tex = BitmapFactory.decodeFile("assets/file.png");
         
-        float packages[] = new float[6*4*div*div];
-        int indices[] = new int[6*div*div];
-        float vals[][] = new float[div][div];
+        ByteBuffer pix_buf = ByteBuffer.allocate(tex.getByteCount());
         
-        for (int i = 0; i < div; i ++){
-        	for (int j = 0; j < div; j++){
-        		vals[i][j] = (float)Math.sin(i * j * .004) * .2f;
-        	}
-        }
-		for (int i = 0; i < div-1; i ++){
-        	for (int j = 0; j < div-1; j++){
-        		
-        		int tl, tr, bl, br;
-        		
-        		float x = (i-div/2) * scale;
-        		float z = (j-div/2) * scale;
-        		
-        		float normal[] = {0,0,0};
-        		
-        		float va[] = {
-        				i*scale,
-        				vals[i][j],
-        				j*scale
-        		};
-        		
-        		float vb[] = {
-        				(i+1)*scale,
-        				vals[i+1][j],
-        				(j) * scale
-        		};
-        		
-        		float vc[] = {
-        				(i)*scale,
-        				vals[i][j+1],
-        				(j+1) * scale
-        		};
-        		
-        		for (int k = 0; k < 3; k++){
-        			vb[k] -= va[k];
-        			vc[k] -= va[k];
-        		}
-        		
-        		normal[0] = (vc[1] * vb[2]) - (vc[2]*  vb[1]);
-        		normal[1] = (vc[2]*  vb[0]) - (vc[0] * vb[2]);
-        		normal[2] = (vc[0] * vb[1]) - (vc[1] * vb[0]);
-        		
-        		tl = vcount/3;
-        		
-        		//vertex
-        		
-        		packages[vcount] = x;
-        		packages[vcount+1] = vals[i][j];
-        		packages[vcount+2] = z;
-        		vcount +=3;
-        		
-        		//normal
-        		
-        		packages[vcount] = normal[0]; packages[vcount+1] = normal[1]; packages[vcount+2] = normal[2];
-        		vcount +=3;
-        		
-        		br = vcount/3;
-        		
-        		packages[vcount] = x+1*scale;
-        		packages[vcount+1] = vals[i+1][j+1];
-        		packages[vcount+2] = z+1*scale;
-        		
-        		vcount +=3;
-        		
-        		packages[vcount] = normal[0]; packages[vcount+1] = normal[1]; packages[vcount+2] = normal[2];
-        		vcount +=3;
-        		
-        		bl = vcount/3;
-        		
-        		packages[vcount] = x;
-        		packages[vcount+1] = vals[i][j+1];
-        		packages[vcount+2] = z+1*scale;
-        		
-        		vcount +=3;
-        		
-        		packages[vcount] = normal[0]; packages[vcount+1] = normal[1]; packages[vcount+2] = normal[2];
-        		vcount +=3;
-        		
-        		tr = vcount/3;
-        		
-        		packages[vcount] = x+1*scale;
-        		packages[vcount+1] = vals[i+1][j];
-        		packages[vcount+2] = z;
-        		
-        		vcount +=3;
-        		
-        		packages[vcount] = normal[0]; packages[vcount+1] = normal[1]; packages[vcount+2] = normal[2];
-        		vcount +=3;
-        		
-        		indices[icount] = tl;
-        		icount++;
-        		indices[icount] = tr;
-        		icount++;
-        		indices[icount] = br;
-        		icount++;
-        		
-        		indices[icount] = tl;
-        		icount++;
-        		indices[icount] = bl;
-        		icount++;
-        		indices[icount] = br;
-        		icount++;
-        		
-        		
-        	}
+        tex.copyPixelsToBuffer(pix_buf);
+        
+        IntBuffer ib = IntBuffer.allocate(1);
+        
+        GLES20.glEnable(GLES20.GL_TEXTURE_2D);
+        
+        GLES20.glGenTextures(1, ib);
+        
+        texture = ib.get();
+        
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        
+        GLES20.glTexImage2D(
+        	GLES20.GL_TEXTURE_2D,
+        	0,
+        	GLES20.GL_RGB,
+        	tex.getWidth(),
+        	tex.getHeight(),
+        	0,
+        	GLES20.GL_RGB,
+        	GLES20.GL_UNSIGNED_BYTE,
+        	pix_buf
         	
-        }
+        );
         
-        
-      
-        
-        vbo.setBuffers(packages, indices);         */
         
     }
 
     public void onDrawFrame(GL10 unused) {
 
         if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk ) {
-            float[] vertex_data = m_dataFetcher.getVertexData();
-
-            int[] index_data = new int[vertex_data.length / 6];
+        	
+        	int SIZE_OF_VERTEX_PACKAGE = 8;
+        	
+        	float[] vertex_data = m_dataFetcher.getVertexData();
+        	
+        	int num_indices = vertex_data.length / SIZE_OF_VERTEX_PACKAGE;
+        	
+            int[] index_data = new int[num_indices];
 
             for(int i = 0; i < index_data.length; i++) {
                 index_data[i] = i*2;
