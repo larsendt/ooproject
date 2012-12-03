@@ -21,6 +21,7 @@ public class VBO {
     private static final int ELEMENTS_IN_VERTEX = 3;
     private static final int ELEMENTS_IN_TXCOORD = 2;
     private static final int ELEMENTS_IN_PACKAGE = 8;
+    private static final int BYTES_IN_PACKAGE = ELEMENTS_IN_PACKAGE * FLOAT_BYTE_SIZE;
     
     private int elements_length;
     
@@ -44,7 +45,7 @@ public class VBO {
         att_txcoord = GLES20.glGetAttribLocation(program, "txcoord");
         if(att_txcoord == -1) {
         }
-        MyGLRenderer.checkGlError("normal glGetAttribLocation");
+        MyGLRenderer.checkGlError("txcoord glGetAttribLocation");
         
         IntBuffer ib = IntBuffer.allocate(2);
     	GLES20.glGenBuffers(2, ib);
@@ -123,7 +124,7 @@ public class VBO {
     				ELEMENTS_IN_VERTEX,
     				GLES20.GL_FLOAT,
     				false,
-    				ELEMENTS_IN_PACKAGE,
+    				BYTES_IN_PACKAGE,
     				0
     	);
     	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
@@ -133,7 +134,7 @@ public class VBO {
                 ELEMENTS_IN_VERTEX,
                 GLES20.GL_FLOAT,
                 false,
-                ELEMENTS_IN_PACKAGE,
+                BYTES_IN_PACKAGE,
                 3
         );
         MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
@@ -143,7 +144,7 @@ public class VBO {
                 ELEMENTS_IN_TXCOORD,
                 GLES20.GL_FLOAT,
                 false,
-                ELEMENTS_IN_PACKAGE,
+                BYTES_IN_PACKAGE,
                 6
         );
         MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
@@ -163,6 +164,8 @@ public class VBO {
     	MyGLRenderer.checkGlError("glDrawElements");
     	
     	GLES20.glDisableVertexAttribArray(att_vertex);
+    	GLES20.glDisableVertexAttribArray(att_normal);
+    	GLES20.glDisableVertexAttribArray(att_txcoord);
     	MyGLRenderer.checkGlError("glDisableVertexAttribArray");
     	
     }

@@ -76,7 +76,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "void main() {" +
         "	vec4 color = texture2D(tex, f_txcoord);" +
         "	vec3 intensity = vec3(color)*light;" +
-        "	gl_FragColor = vec4(intensity + vec3(.2), 1);" +
+        "	gl_FragColor = vec4(intensity + vec3(light), 1);" +
         "}";
     
     private float[] pMatrix = new float[16];
@@ -117,10 +117,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         ByteBuffer pix_buf = ByteBuffer.allocate(3*4);
         
         byte colors[] = {
-        	(byte)255,(byte)255,(byte)255,
-        	(byte)0,(byte)0,(byte)0,
-        	(byte)0,(byte)0,(byte)0,
-        	(byte)255,(byte)255,(byte)255
+        	(byte)255,(byte)0,(byte)255,
+        	(byte)0,(byte)255,(byte)0,
+        	(byte)0,(byte)255,(byte)0,
+        	(byte)255,(byte)0,(byte)255
         };
         
         pix_buf.put(colors);
@@ -174,7 +174,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             
             for (int i = 0; i < vertex_data.length; i+=8){
             	Log.d(TAG, 
-            			"(" + Float.toString(vertex_data[i+0]) + " " +
+            			Integer.toString(i) + " (" + Float.toString(vertex_data[i+0]) + " " +
             			Float.toString(vertex_data[i+1]) + " " +
             			Float.toString(vertex_data[i+2]) + ") (" +
             			Float.toString(vertex_data[i+3]) + " " +
@@ -186,7 +186,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             }
 
             for(int i = 0; i < index_data.length; i++) {
-                index_data[i] = i*2;
+                index_data[i] = i;
             }
 
             vbo.setBuffers(vertex_data, index_data);
