@@ -1,3 +1,5 @@
+import math
+
 class Vec2(object):
     def __init__(self, x, y):
         self.x = x
@@ -55,7 +57,7 @@ class Vec3(object):
 
     def normalized(self):
         l = self.length()
-        return Vec2(self.x/l, self.y/l, self.z/l)
+        return Vec3(self.x/l, self.y/l, self.z/l)
 
 
 
