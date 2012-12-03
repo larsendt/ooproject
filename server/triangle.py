@@ -6,18 +6,20 @@ class Triangle(object):
         self.v2 = v2
         self.v3 = v3
 
-        v = v2-v1
-        u = v3-v2
+        self.compute_normal()
 
+        self.vertices = [v1, v2, v3]
+        self.normals = [self.facenormal, self.facenormal, self.facenormal]
+
+    def compute_normal(self):
         n = vector.Vec3(0,0,0)
+        v = self.v2-self.v1
+        u = self.v3-self.v2
 
         n.x = u.y*v.z - u.z*v.y
         n.y = u.z*v.x - u.x*v.z
         n.z = u.x*v.y - u.y*v.x
-
-        self.facenormal = n#v1.cross(v2)
-        self.vertices = [v1, v2, v3]
-        self.normals = [self.facenormal, self.facenormal, self.facenormal]
+        self.facenormal = n
 
 
     def serial_data(self):

@@ -1,5 +1,14 @@
 import chunk, perlin, triangle, vector
 
+DELTA = 0.0001
+
+def noise(p, x, y, octaves):
+    v = 0
+    for i in range(octaves):
+        v += p.noise2(x * (2 ** i), y * (2 ** i)) / (2 * (i + 1))
+
+    return v
+
 class ChunkGenerator(object):
     def __init__(self, resolution = 10, size = 1):
         self.size = size
@@ -10,14 +19,34 @@ class ChunkGenerator(object):
 
         # generate the initial heightmap
         vertices = []
+        normals = []
         for i in range(self.resolution):
-            arr = []
+            varr = []
+            narr = []
             for j in range(self.resolution):
                 xval = (x + i) * (float(self.size) / self.resolution)
                 zval = (z + j) * (float(self.size) / self.resolution)
-                h = p.noise2(xval, zval)*.1 + p.noise2((xval+5)*3, (zval+10)*3)*.2
-                arr.append(vector.Vec3(xval, h, zval))
-            vertices.append(arr)
+                h = noise(p, xval, zval, 2)
+                hdx = noise(p, xval+DELTA, zval, 2)
+                hdz = noise(p, xval, zval+DELTA, 2)
+    
+                v1 = vector.Vec3(xval, h, zval)
+                v2 = vector.Vec3(xval+DELTA, hdx, zval)
+                v3 = vector.Vec3(xval, hdz, zval+DELTA)
+
+                v = v2-v1
+                u = v3-v2
+
+                n = vector.Vec3(0, 0, 0)
+                n.x = u.y*v.z - u.z*v.y
+                n.y = u.z*v.x - u.x*v.z
+                n.z = u.x*v.y - u.y*v.x
+
+                varr.append(vector.Vec3(xval, h, zval))
+                narr.append(n)
+
+            vertices.append(varr)
+            normals.append(narr)
         
         # split the heightmap into triangles
         triangles = []
@@ -33,12 +62,20 @@ class ChunkGenerator(object):
             v1 = vertices[x][z]
             v2 = vertices[x+1][z]
             v3 = vertices[x][z+1]
-            triangles.append(triangle.Triangle(v1, v2, v3))
+            t = triangle.Triangle(v1, v2, v3)
+            t.normals[0] = normals[x][z]
+            t.normals[1] = normals[x+1][z]
+            t.normals[2] = normals[x][z+1]
+            triangles.append(t)
             
             v1 = vertices[x][z+1]
             v2 = vertices[x+1][z+1]
             v3 = vertices[x+1][z]
-            triangles.append(triangle.Triangle(v3, v2, v1))
+            t = triangle.Triangle(v1, v2, v3)
+            t.normals[0] = normals[x][z+1]
+            t.normals[1] = normals[x+1][z+1]
+            t.normals[2] = normals[x+1][z]
+            triangles.append(t)
 
         return chunk.Chunk(triangles, x=x, y=z) 
 

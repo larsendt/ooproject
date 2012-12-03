@@ -4,6 +4,7 @@ import filecache
 import json
 import base64
 import zlib
+import time
 
 class Terrain(object):
     def __init__(self):
@@ -20,7 +21,10 @@ class Terrain(object):
             return self.cache[(x, y, self.res, self.size, compression)]
         else:
             print "generating new chunk for [x:%d, y:%d, res:%d, size:%d, compression:%s]" % (x, y, self.res, self.size, compression)
+
+            start = time.time()
             chunk = self.cg.generate_chunk(x, y)
+
             vertex_data = chunk.serial_vertex_data()
 
             if compression:
@@ -34,4 +38,7 @@ class Terrain(object):
                                   "vertex_data":encoded_data,
                                   "compression":compression})
             self.cache[(x, y, self.res, self.size, compression)] = jsonstr
+
+            end = time.time()
+            print "chunk complete (%.1f seconds)" % (end-start)
             return jsonstr
