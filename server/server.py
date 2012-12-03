@@ -23,7 +23,12 @@ class terrain_server(object):
         except AttributeError:
             return json.dumps({"type":"error", "error":"invalid coordinates given"})
 
-        return self.terrain.get_response_for(x, y)
+        try:
+            compression = True if params.compression == "yes" else False
+        except AttributeError:
+            compression = False
+
+        return self.terrain.get_response_for(x, y, compression)
 
 app = web.application(urls, globals())
 

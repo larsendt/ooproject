@@ -3,6 +3,7 @@ import config
 import filecache
 import json
 import base64
+import zlib
 
 class Terrain(object):
     def __init__(self):
@@ -13,19 +14,24 @@ class Terrain(object):
         self.cg = chunk_generator.ChunkGenerator(resolution = self.res, size = self.size)
         self.cache = filecache.Cache("terrain_cache", "terrain_server", self.cache_size)
 
-    def get_response_for(self, x, y):
-        if (x, y, self.res, self.size) in self.cache:
-            print "chunk [x:%d, y:%d, res:%d, size:%d] was cached" % (x, y, self.res, self.size)
-            return self.cache[(x, y, self.res, self.size)]
+    def get_response_for(self, x, y, compression):
+        if (x, y, self.res, self.size, compression) in self.cache:
+            print "chunk [x:%d, y:%d, res:%d, size:%d, compression:%s] was cached" % (x, y, self.res, self.size, compression)
+            return self.cache[(x, y, self.res, self.size, compression)]
         else:
-            print "generating new chunk for [x:%d, y:%d, res:%d, size:%d]" % (x, y, self.res, self.size)
+            print "generating new chunk for [x:%d, y:%d, res:%d, size:%d, compression:%s]" % (x, y, self.res, self.size, compression)
             chunk = self.cg.generate_chunk(x, y)
             vertex_data = chunk.serial_vertex_data()
+
+            if compression:
+                vertex_data = zlib.compress(vertex_data)
+
             encoded_data = base64.b64encode(vertex_data)
             jsonstr = json.dumps({"type":"chunk", 
                                   "x":x, "y":y, 
                                   "chunk_resolution": self.res,
                                   "chunk_size": self.size, 
-                                  "vertex_data":encoded_data})
-            self.cache[(x, y, self.res, self.size)] = jsonstr
+                                  "vertex_data":encoded_data,
+                                  "compression":compression})
+            self.cache[(x, y, self.res, self.size, compression)] = jsonstr
             return jsonstr
