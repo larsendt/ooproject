@@ -31,6 +31,7 @@ public class OpenGLES20Complete extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        
         // Create a GLSurfaceView instance and set it
         // as the ContentView for this Activity
         mGLView = new MyGLSurfaceView(this);
@@ -61,9 +62,11 @@ class MyGLSurfaceView extends GLSurfaceView {
 
     private final MyGLRenderer mRenderer;
 
+    public Context myContext;
+    
     public MyGLSurfaceView(Context context) {
         super(context);
-
+        myContext = context;
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
 

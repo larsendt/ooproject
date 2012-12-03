@@ -67,6 +67,7 @@ public class Shader {
 	
 	public void setMatrices(float[] mvMatrix, float[] pMatrix)
 	{
+		MyGLRenderer.checkGlError("Start of setmatrices");
 		setUniformMatrix4fv("mvMatrix", mvMatrix);
 		MyGLRenderer.checkGlError("mvMatrix setmatrix");
 		setUniformMatrix4fv("pMatrix", pMatrix);

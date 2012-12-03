@@ -28,6 +28,7 @@ import java.util.Stack;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
@@ -54,11 +55,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "attribute vec3 vertex;" +
         "attribute vec3 normal;" +
         "attribute vec2 txcoord;" +
-        "varying float light;" +
         "varying vec2 f_txcoord;" +
+        "varying float light;" +
+        
 
         "void main() {" +
         "	gl_PointSize = 3.0;" +
+        "	f_txcoord = txcoord;" +
         "	light = dot(normalize(vec3(1.0,1.0,1.0)), normalize(normal));" +
         
         // the matrix must be included as a modifier of gl_Position
@@ -72,7 +75,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "varying vec2 f_txcoord;" +
         "void main() {" +
         "	vec4 color = texture2D(tex, f_txcoord);" +
-        "	gl_FragColor = vec4(vec3(vec3(color)*light + .2), 1));" +
+        "	vec3 intensity = vec3(color)*light;" +
+        "	gl_FragColor = vec4(intensity + vec3(.2), 1);" +
         "}";
     
     private float[] pMatrix = new float[16];
@@ -101,7 +105,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
         checkGlError("Before vbo init");
         vbo = new MeshVBO(shader.getProgram());
-
+        checkGlError("vbo");
         
         m_dataFetcher = new DataFetcher();
         m_dataFetcher.execute("banana");
@@ -110,28 +114,41 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
         
         
-        Bitmap tex = BitmapFactory.decodeFile("assets/file.jpg");
+        ByteBuffer pix_buf = ByteBuffer.allocate(3*4);
         
-        ByteBuffer pix_buf = ByteBuffer.allocate(tex.getByteCount());
+        byte colors[] = {
+        	(byte)255,(byte)255,(byte)255,
+        	(byte)0,(byte)0,(byte)0,
+        	(byte)0,(byte)0,(byte)0,
+        	(byte)255,(byte)255,(byte)255
+        };
         
-        tex.copyPixelsToBuffer(pix_buf);
+        pix_buf.put(colors);
         
         IntBuffer ib = IntBuffer.allocate(1);
         
-        GLES20.glEnable(GLES20.GL_TEXTURE_2D);
+        checkGlError("before glEnable");
+        
+        //GLES20.glEnable(GLES20.GL_TEXTURE_2D);
+        
+        checkGlError("enable textures");
         
         GLES20.glGenTextures(1, ib);
+        
+        checkGlError("gen texture");
         
         texture = ib.get();
         
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
         
+        checkGlError("bind texture");
+        
         GLES20.glTexImage2D(
         	GLES20.GL_TEXTURE_2D,
         	0,
         	GLES20.GL_RGB,
-        	tex.getWidth(),
-        	tex.getHeight(),
+        	2,
+        	2,
         	0,
         	GLES20.GL_RGB,
         	GLES20.GL_UNSIGNED_BYTE,
@@ -139,6 +156,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         	
         );
         
+        checkGlError("TexImage");
         
     }
 
@@ -153,6 +171,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         	int num_indices = vertex_data.length / SIZE_OF_VERTEX_PACKAGE;
         	
             int[] index_data = new int[num_indices];
+            
+            for (int i = 0; i < vertex_data.length; i+=8){
+            	Log.d(TAG, 
+            			"(" + Float.toString(vertex_data[i+0]) + " " +
+            			Float.toString(vertex_data[i+1]) + " " +
+            			Float.toString(vertex_data[i+2]) + ") (" +
+            			Float.toString(vertex_data[i+3]) + " " +
+            			Float.toString(vertex_data[i+4]) + " " +
+            			Float.toString(vertex_data[i+5]) + ") (" +
+            			Float.toString(vertex_data[i+6]) + " " +
+            			Float.toString(vertex_data[i+7]) + ")"
+            	);
+            }
 
             for(int i = 0; i < index_data.length; i++) {
                 index_data[i] = i*2;
@@ -179,6 +210,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         //Matrix.translateM(mvMatrix, 0, -2.0f,0f, -1.0f);
         
         // Draw triangle
+        
         shader.useProgram();
         
         shader.setMatrices(mvMatrix, pMatrix);
