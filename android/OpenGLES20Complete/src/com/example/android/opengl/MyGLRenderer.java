@@ -62,7 +62,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "void main() {" +
         "	gl_PointSize = 3.0;" +
         "	f_txcoord = txcoord;" +
-        "	light = dot(normalize(vec3(1.0,1.0,1.0)), normalize(normal));" +
+        "   vec3 lightvec = normalize(vec3(1.0) - (mvMatrix * vec4(vertex, 1.0)));" +
+        "	light = dot(lightvec, normalize(normal));" +
         
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
@@ -206,33 +207,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
         Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
-        
-        //Matrix.translateM(mvMatrix, 0, -2.0f,0f, -1.0f);
-        
-        // Draw triangle
-        
+
         shader.useProgram();
-        
         shader.setMatrices(mvMatrix, pMatrix);
-        
         vbo.draw();
         
         popMVMatrix();
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
-        // Adjust the viewport based on geometry changes,
-        // such as screen rotation
         GLES20.glViewport(0, 0, width, height);
-
         float ratio = (float) width / height;
-
-        // this projection matrix is applied to object coordinates
-        // in the onDrawFrame() method
         Matrix.setIdentityM(pMatrix, 0);
-        Matrix.perspectiveM(pMatrix, 0, 60.0f, ratio, .01f,100.0f);
-        //Matrix.orthoM(pMatrix, 0, -2*ratio, 2*ratio, -2, 2, -4, 4);
-
+        Matrix.perspectiveM(pMatrix, 0, 60.0f, ratio, .1f,100.0f);
     }
 
 
