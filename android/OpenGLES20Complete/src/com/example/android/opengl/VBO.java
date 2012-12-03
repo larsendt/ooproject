@@ -108,6 +108,7 @@ public class VBO {
     
     public void draw()
     {
+    	Log.d(MyGLRenderer.TAG, "asdf");
     	MyGLRenderer.checkGlError("draw start");
     	
     	GLES20.glEnableVertexAttribArray(att_vertex);
@@ -127,6 +128,9 @@ public class VBO {
     				BYTES_IN_PACKAGE,
     				0
     	);
+    	
+    	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
+    	
     	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
 
         GLES20.glVertexAttribPointer(
@@ -135,8 +139,11 @@ public class VBO {
                 GLES20.GL_FLOAT,
                 false,
                 BYTES_IN_PACKAGE,
-                3
+                3*FLOAT_BYTE_SIZE
         );
+        
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
+        
         MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
         
         GLES20.glVertexAttribPointer(
@@ -145,7 +152,7 @@ public class VBO {
                 GLES20.GL_FLOAT,
                 false,
                 BYTES_IN_PACKAGE,
-                6
+                6*FLOAT_BYTE_SIZE
         );
         MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
 
