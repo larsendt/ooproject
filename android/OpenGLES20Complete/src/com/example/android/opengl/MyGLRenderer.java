@@ -57,14 +57,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "attribute vec2 txcoord;" +
         "varying vec2 f_txcoord;" +
         "varying float light;" +
-        
+
 
         "void main() {" +
         "	gl_PointSize = 3.0;" +
         "	f_txcoord = txcoord;" +
         "   vec3 lightvec = normalize(vec3(1.0) - (mvMatrix * vec4(vertex, 1.0)));" +
         "	light = dot(lightvec, normalize(normal));" +
-        
+
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
         "}";
@@ -79,7 +79,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	vec3 intensity = vec3(color)*light;" +
         "	gl_FragColor = vec4(intensity + vec3(light), 1);" +
         "}";
-    
+
     private float[] pMatrix = new float[16];
     private float[] mvMatrix = new float[16];
     private float[] nMatrix = new float[16];
@@ -172,19 +172,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         	int num_indices = vertex_data.length / SIZE_OF_VERTEX_PACKAGE;
         	
             int[] index_data = new int[num_indices];
-            
-            for (int i = 0; i < vertex_data.length; i+=8){
-            	Log.d(TAG, 
-            			Integer.toString(i) + " (" + Float.toString(vertex_data[i+0]) + " " +
-            			Float.toString(vertex_data[i+1]) + " " +
-            			Float.toString(vertex_data[i+2]) + ") (" +
-            			Float.toString(vertex_data[i+3]) + " " +
-            			Float.toString(vertex_data[i+4]) + " " +
-            			Float.toString(vertex_data[i+5]) + ") (" +
-            			Float.toString(vertex_data[i+6]) + " " +
-            			Float.toString(vertex_data[i+7]) + ")"
-            	);
-            }
 
             for(int i = 0; i < index_data.length; i++) {
                 index_data[i] = i;
