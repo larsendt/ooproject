@@ -43,7 +43,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public static final String TAG = "OO";
     private Shader shader;
-    private MeshVBO vbo;
+    private VBO vbo;
     private boolean m_hasChunk = false;
     DataFetcher m_dataFetcher;
 
@@ -104,7 +104,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
         checkGlError("Before vbo init");
-        vbo = new MeshVBO(shader.getProgram());
+        vbo = new VBO(shader.getProgram());
         checkGlError("vbo");
         
         m_dataFetcher = new DataFetcher();
