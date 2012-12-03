@@ -16,7 +16,7 @@ import display_list
 import json
 import base64
 import struct
-
+import zlib
 
 
 def get_chunk_data(x, y, host, port):
@@ -24,7 +24,7 @@ def get_chunk_data(x, y, host, port):
 
         start = time.time()
        
-        f = urllib2.urlopen("http://%s:%d/?x=%d&y=%d" % (host, port, x, y))
+        f = urllib2.urlopen("http://%s:%d/?x=%d&y=%d&compression=yes" % (host, port, x, y))
         data = f.read()
         f.close()
 
@@ -37,7 +37,10 @@ def get_chunk_data(x, y, host, port):
         if obj["type"] == "error":
             raise ValueError("Server error: " + obj["error"])
         else:
-            return base64.b64decode(obj["vertex_data"])
+            if obj["compression"]:
+                return zlib.decompress(base64.b64decode(obj["vertex_data"]))
+            else:
+                return base64.b64decode(obj["vertex_data"])
 
 class GLWrapper(object):
     def __init__(self, hostname, port, x, y):
