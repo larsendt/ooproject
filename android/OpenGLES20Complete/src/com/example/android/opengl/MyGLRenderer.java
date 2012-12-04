@@ -67,7 +67,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	f_txcoord = txcoord;" +
         "	f_normal = normalize(nMatrix*normal);" +
         "	f_vertex = vec3(mvMatrix * vec4(vertex, 1.0));" +
-        "	vec3 lightPos = vec3(mvMatrix * vec4(1.0,20.0,1.0,1.0));" +
+        "	vec3 lightPos = vec3(mvMatrix * vec4(2.0,.5,2.0,1.0));" +
         "	f_lightPos = lightPos;" +
 
         // the matrix must be included as a modifier of gl_Position
@@ -88,14 +88,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	vec3 R = normalize(-reflect(L,f_normal));" +
         
         "	vec3 ambient = vec3(.0,.0,.0);" +
-        "	vec3 diffuse = vec3(.4,.2,.2) * max(dot(f_normal, L), 0.0);" +
+        "	vec3 diffuse = vec3(1.0) * max(dot(L, f_normal), 0.0);" +
         "	diffuse = clamp(diffuse, 0.0,1.0);" +
-        "	vec3 specular = vec3(.1,.1,.4)*pow(max(dot(R,E),0.0), .3*30.0);" +
+        "	vec3 specular = vec3(1.0)*pow(max(dot(R,E),0.0), .3*30.0);" +
         "	specular = clamp(specular, 0.0,1.0);" +
         
         "	vec4 color = texture2D(tex, f_txcoord);" +
-        "	vec3 intensity = vec3(color);" +
-        "	gl_FragColor = vec4(ambient+diffuse+specular, 1.0);" +
+        "	vec3 intensity = vec3(color)*diffuse;" +
+        "	gl_FragColor = vec4(ambient+intensity+specular, 1.0);" +
         "}";
 
     private float[] pMatrix = new float[16];
@@ -142,14 +142,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         pix_buf.put((byte)255);pix_buf.put((byte)255);pix_buf.put((byte)255);
         
-        pix_buf.put((byte)50);pix_buf.put((byte)255);pix_buf.put((byte)255);
-        pix_buf.put((byte)50);pix_buf.put((byte)255);pix_buf.put((byte)255);
+        pix_buf.put((byte)0);pix_buf.put((byte)0);pix_buf.put((byte)0);
+        pix_buf.put((byte)0);pix_buf.put((byte)0);pix_buf.put((byte)0);
         
         pix_buf.put((byte)255);pix_buf.put((byte)255);pix_buf.put((byte)255);
         
         IntBuffer ib = IntBuffer.allocate(1);
         
         GLES20.glGenTextures(1, ib);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         
         checkGlError("gen texture");
         
@@ -158,6 +159,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
         
         checkGlError("bind texture");
+        
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         
         GLES20.glTexImage2D(
         	GLES20.GL_TEXTURE_2D,
@@ -211,15 +216,42 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         pushMVMatrix();
         
         
-        
+        Matrix.translateM(mvMatrix, 0, 0.0f, 0.0f, -4.0f);
         Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
         Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
+        Matrix.translateM(mvMatrix, 0, -2.0f,0.0f, -2.0f);
         
-        Matrix.translateM(mvMatrix, 0, -2.0f,-1.0f, -2.0f);
         
         shader.useProgram();
         
-        Matrix.invertM(nInvertMatrix, 0, mvMatrix, 0);
+        setNMatrix();
+        
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture);
+        
+        checkGlError("bind texture");
+        
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        
+        checkGlError("active texture");
+        
+        shader.setUniform1i("tex", 0);
+        
+        shader.setMatrices(mvMatrix, pMatrix, nMatrix);
+        vbo.draw();
+        
+        popMVMatrix();
+    }
+
+    public void onSurfaceChanged(GL10 unused, int width, int height) {
+        GLES20.glViewport(0, 0, width, height);
+        float ratio = (float) width / height;
+        Matrix.setIdentityM(pMatrix, 0);
+        Matrix.perspectiveM(pMatrix, 0, 60.0f, ratio, .1f,100.0f);
+    }
+    
+    private void setNMatrix(){
+    	
+    	Matrix.invertM(nInvertMatrix, 0, mvMatrix, 0);
         Matrix.transposeM(nInvertTransposeMatrix, 0,nInvertMatrix, 0);
         
         nMatrix[0] = nInvertTransposeMatrix[0];
@@ -233,19 +265,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         nMatrix[6] = nInvertTransposeMatrix[8];
         nMatrix[7] = nInvertTransposeMatrix[9];
         nMatrix[8] = nInvertTransposeMatrix[10];
-        
-        
-        shader.setMatrices(mvMatrix, pMatrix, nMatrix);
-        vbo.draw();
-        
-        popMVMatrix();
-    }
-
-    public void onSurfaceChanged(GL10 unused, int width, int height) {
-        GLES20.glViewport(0, 0, width, height);
-        float ratio = (float) width / height;
-        Matrix.setIdentityM(pMatrix, 0);
-        Matrix.perspectiveM(pMatrix, 0, 60.0f, ratio, .1f,100.0f);
     }
 
 

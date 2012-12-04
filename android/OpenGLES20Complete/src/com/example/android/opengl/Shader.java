@@ -38,6 +38,12 @@ public class Shader {
 		
 	}
 	
+	public void setUniform1i(String name, int value){
+		int location = GLES20.glGetUniformLocation(program, name);
+		
+		GLES20.glUniform1i(location, value);
+	}
+	
 	public void setUniform1f(String name, float value){
 		int location = GLES20.glGetUniformLocation(program, name);
 		GLES20.glUniform1f(location, value);
