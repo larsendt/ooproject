@@ -35,6 +35,7 @@ import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
+import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -91,7 +92,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	vec3 ambient = vec3(.0,.0,.0);" +
         "	vec3 diffuse = vec3(1.0) * max(dot(L, f_normal), 0.0);" +
         "	diffuse = clamp(diffuse, 0.0,1.0);" +
-        "	vec3 specular = vec3(.2)*pow(max(dot(R,E),0.0), .3);" +
+        "	vec3 specular = vec3(.2)*pow(max(dot(R,E),0.0), 20.0);" +
         "	specular = clamp(specular, 0.0,1.0);" +
         
         "	vec4 color = texture2D(tex, f_txcoord*10.0);" +
@@ -140,20 +141,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
         
         
-        Bitmap myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.RGB_565);
+        Bitmap myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
         
         myBitmap.setPixel(0, 0, Color.BLACK);
         myBitmap.setPixel(0, 1, Color.WHITE);
         myBitmap.setPixel(1, 0, Color.BLACK);
         myBitmap.setPixel(1, 1, Color.WHITE);
-        
-        
-        
-        ByteBuffer pix_buf = ByteBuffer.allocate(3*4);
-        
-        myBitmap.copyPixelsToBuffer(pix_buf);
-        
-        
+
         IntBuffer ib = IntBuffer.allocate(1);
         
         GLES20.glGenTextures(1, ib);
@@ -168,21 +162,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         checkGlError("bind texture");
         
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-        
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        
-        GLES20.glTexImage2D(
-        	GLES20.GL_TEXTURE_2D,
-        	0,
-        	GLES20.GL_RGB,
-        	2,
-        	2,
-        	0,
-        	GLES20.GL_RGB,
-        	GLES20.GL_UNSIGNED_BYTE,
-        	pix_buf
-        	
-        );
+
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, myBitmap, 0);
         
         checkGlError("TexImage");
         
@@ -232,12 +214,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         shader.useProgram();
         
         setNMatrix();
-        
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture);
         
         checkGlError("bind texture");
-        
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
         
         checkGlError("active texture");
         
