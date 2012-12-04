@@ -55,6 +55,16 @@ public class Shader {
 		GLES20.glUniform4f(location, v1,v2,v3,v4);
 	}
 	
+	public void setUniformMatrix3fv(String name, float values[])
+	{
+		int location = GLES20.glGetUniformLocation(program, name);
+		if (location == -1){
+			Log.d(MyGLRenderer.TAG, "Location for " + name + " is invalid");
+		}
+		
+		GLES20.glUniformMatrix3fv(location, 1, false, values, 0);
+	}
+	
 	public void setUniformMatrix4fv(String name, float values[])
 	{
 		int location = GLES20.glGetUniformLocation(program, name);
@@ -82,7 +92,7 @@ public class Shader {
 		MyGLRenderer.checkGlError("mvMatrix setmatrix");
 		setUniformMatrix4fv("pMatrix", pMatrix);
 		MyGLRenderer.checkGlError("pMatrix setmatrix");
-		setUniformMatrix4fv("nMatrix", nMatrix);
+		setUniformMatrix3fv("nMatrix", nMatrix);
 		MyGLRenderer.checkGlError("nMatrix setmatrix");
 	}
 	

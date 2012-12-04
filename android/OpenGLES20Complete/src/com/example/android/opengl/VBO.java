@@ -108,7 +108,6 @@ public class VBO {
     
     public void draw()
     {
-    	Log.d(MyGLRenderer.TAG, "asdf");
     	MyGLRenderer.checkGlError("draw start");
     	
     	GLES20.glEnableVertexAttribArray(att_vertex);

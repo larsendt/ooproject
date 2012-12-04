@@ -52,6 +52,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // the coordinates of the objects that use this vertex shader
         "uniform mat4 mvMatrix;" +
         "uniform mat4 pMatrix;" +
+        "uniform mat3 nMatrix;" +
         "attribute vec3 vertex;" +
         "attribute vec3 normal;" +
         "attribute vec2 txcoord;" +
@@ -62,8 +63,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "void main() {" +
         "	gl_PointSize = 3.0;" +
         "	f_txcoord = txcoord;" +
-        "   vec3 lightvec = normalize(vec3(1.0) - (mvMatrix * vec4(vertex, 1.0)));" +
-        "	light = dot(lightvec, normalize(normal));" +
+        "	vec3 lightPos = vec3(mvMatrix * vec4(0.0,.5,0.0,1.0));" +
+        "	vec3 vxPos = vec3(mvMatrix * vec4(vertex, 1.0));" +
+        "   vec3 lightvec = normalize(vec3(lightPos - vxPos));" +
+        "	light = dot(lightvec, normalize(nMatrix*normal));" +
 
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
@@ -76,13 +79,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "varying vec2 f_txcoord;" +
         "void main() {" +
         "	vec4 color = texture2D(tex, f_txcoord);" +
-        "	vec3 intensity = vec3(color)*light;" +
-        "	gl_FragColor = vec4(intensity + vec3(light), 1);" +
+        "	vec3 intensity = vec3(color);" +
+        "	gl_FragColor = vec4(vec3(1.0)*light + vec3(.1) + intensity, 1.0);" +
         "}";
 
     private float[] pMatrix = new float[16];
     private float[] mvMatrix = new float[16];
-    private float[] nMatrix = new float[16];
+    private float[] nMatrix = new float[9];
+    private float[] nInvertMatrix = new float[16];
+    private float[] nInvertTransposeMatrix = new float[16];
     private float[] tmpMatrix = new float[16];
     
     private Stack<float[]> projectionStack = new Stack<float[]>();
@@ -117,22 +122,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         ByteBuffer pix_buf = ByteBuffer.allocate(3*4);
         
-        byte colors[] = {
-        	(byte)255,(byte)0,(byte)255,
-        	(byte)0,(byte)255,(byte)0,
-        	(byte)0,(byte)255,(byte)0,
-        	(byte)255,(byte)0,(byte)255
-        };
+    
         
-        pix_buf.put(colors);
+        pix_buf.put((byte)255);pix_buf.put((byte)255);pix_buf.put((byte)255);
+        
+        pix_buf.put((byte)50);pix_buf.put((byte)255);pix_buf.put((byte)255);
+        pix_buf.put((byte)50);pix_buf.put((byte)255);pix_buf.put((byte)255);
+        
+        pix_buf.put((byte)255);pix_buf.put((byte)255);pix_buf.put((byte)255);
         
         IntBuffer ib = IntBuffer.allocate(1);
-        
-        checkGlError("before glEnable");
-        
-        //GLES20.glEnable(GLES20.GL_TEXTURE_2D);
-        
-        checkGlError("enable textures");
         
         GLES20.glGenTextures(1, ib);
         
@@ -173,6 +172,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         	
             int[] index_data = new int[num_indices];
 
+            for (int i = 0; i < vertex_data.length; i+=SIZE_OF_VERTEX_PACKAGE){
+            	//Log.d(TAG, Float.toString(vertex_data[i+3]) + "/" + Float.toString(vertex_data[i+3]) + "/" + Float.toString(vertex_data[i+3]));
+            	
+            }
+            
             for(int i = 0; i < index_data.length; i++) {
                 index_data[i] = i;
             }
@@ -194,9 +198,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
         Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
-
+        
         shader.useProgram();
-        shader.setMatrices(mvMatrix, pMatrix);
+        
+        Matrix.invertM(nInvertMatrix, 0, mvMatrix, 0);
+        Matrix.transposeM(nInvertTransposeMatrix, 0,nInvertMatrix, 0);
+        
+        nMatrix[0] = nInvertTransposeMatrix[0];
+        nMatrix[1] = nInvertTransposeMatrix[1];
+        nMatrix[2] = nInvertTransposeMatrix[2];
+        
+        nMatrix[3] = nInvertTransposeMatrix[4];
+        nMatrix[4] = nInvertTransposeMatrix[5];
+        nMatrix[5] = nInvertTransposeMatrix[6];
+        
+        nMatrix[6] = nInvertTransposeMatrix[8];
+        nMatrix[7] = nInvertTransposeMatrix[9];
+        nMatrix[8] = nInvertTransposeMatrix[10];
+        
+        
+        shader.setMatrices(mvMatrix, pMatrix, nMatrix);
         vbo.draw();
         
         popMVMatrix();
