@@ -48,7 +48,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Shader shader;
     private VBO vbo;
     private boolean m_hasChunk = false;
-    DataFetcher m_dataFetcher;
+    AsyncDataFetcher m_dataFetcher;
 
     private final String vertexShaderCode =
         // This matrix member variable provides a hook to manipulate
@@ -142,7 +142,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         vbo = new VBO(shader.getProgram());
         
-        m_dataFetcher = new DataFetcher();
+        m_dataFetcher = new AsyncDataFetcher();
         m_dataFetcher.execute("banana");
         
         Matrix.setIdentityM(pMatrix, 0);

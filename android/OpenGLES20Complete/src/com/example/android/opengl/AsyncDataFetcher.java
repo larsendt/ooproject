@@ -23,8 +23,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import org.json.JSONTokener;
 
-public class DataFetcher extends AsyncTask<String, Integer, String> {
+public class AsyncDataFetcher extends AsyncTask<String, Integer, String> {
     private float[] m_vertexData;
+
 	@Override
 	protected String doInBackground(String... params) {
 
