@@ -16,6 +16,7 @@
 
 package com.example.android.opengl;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -88,14 +89,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	vec3 L = normalize(f_lightPos - f_vertex); " +
         "	vec3 E = normalize(-f_vertex);" +
         "	vec3 R = normalize(-reflect(L,f_normal));" +
-        
         "	vec3 ambient = vec3(.0,.0,.0);" +
-        "	vec3 diffuse = vec3(1.0) * max(dot(L, f_normal), 0.0);" +
+        "	vec3 diffuse = vec3(.8) * max(dot(L, f_normal), 0.0);" +
         "	diffuse = clamp(diffuse, 0.0,1.0);" +
-        "	vec3 specular = vec3(.2)*pow(max(dot(R,E),0.0), 20.0);" +
+        "	vec3 specular = vec3(.15)*pow(max(dot(R,E),0.0), .3 * 30.0);" +
         "	specular = clamp(specular, 0.0,1.0);" +
         
-        "	vec4 color = texture2D(tex, f_txcoord*10.0);" +
+        "	vec4 color = texture2D(tex, f_txcoord*2.0);" +
         "	vec3 intensity = vec3(color) * diffuse;" +
         "	gl_FragColor = vec4(ambient+intensity+specular, 1.0);" +
         "}";
@@ -116,8 +116,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public volatile float mxAngle;
     public volatile float myAngle;
     public volatile float myY;
-    
+    private Context mContext;
 
+    public void setContext(Context context){
+    	
+    	mContext = context;
+    }
+    
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame color
@@ -126,13 +131,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     	
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        
+        
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
-        checkGlError("Before vbo init");
+
         vbo = new VBO(shader.getProgram());
-        checkGlError("vbo");
-        
-        
-        Log.d(TAG, "127 is " + Byte.toString((byte)127));
         
         m_dataFetcher = new DataFetcher();
         m_dataFetcher.execute("banana");
@@ -141,12 +144,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
         
         
-        Bitmap myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
         
-        myBitmap.setPixel(0, 0, Color.BLACK);
-        myBitmap.setPixel(0, 1, Color.WHITE);
-        myBitmap.setPixel(1, 0, Color.BLACK);
-        myBitmap.setPixel(1, 1, Color.WHITE);
+        Bitmap myBitmap;
+		try {
+			myBitmap = BitmapFactory.decodeStream( mContext.getResources().getAssets().open("rock.bmp"));
+			if (myBitmap == null){
+				Log.d(TAG, "ASDF");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			// farts
+			e.printStackTrace();
+			myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
+	        
+	        myBitmap.setPixel(0, 0, Color.WHITE);
+	        myBitmap.setPixel(0, 1, Color.CYAN);
+	        myBitmap.setPixel(1, 0, Color.CYAN);
+	        myBitmap.setPixel(1, 1, Color.WHITE);
+		}
+        
 
         IntBuffer ib = IntBuffer.allocate(1);
         
