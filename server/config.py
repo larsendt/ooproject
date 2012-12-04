@@ -13,15 +13,17 @@ class Config(object):
     def set(self, key, value):
         try:
             f = open(self.filename, "r")
+            d = json.loads(f.read())
         except IOError:
             d = {}
+        except ValueError:
+            d = {}
         else:
-            d = json.loads(f.read())
             f.close()
 
         d[key] = value
         f = open(self.filename, "w")
-        f.write(json.dumps(d))
+        f.write(json.dumps(d, indent=4))
         f.close()
         print "config set:", key, value
 

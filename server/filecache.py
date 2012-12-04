@@ -3,6 +3,7 @@ import json
 import hashlib
 import time
 import util
+import config
 
 
 def get_hash(item):
@@ -23,10 +24,10 @@ def get_size(start_path = '.'):
 class Cache(object):
     """ On-disk key-value store """
 
-    def __init__(self, directory, cache_name, max_cache_size = 1e9):
+    def __init__(self, directory):
+        self.conf = config.Config("terrain_server.conf")
         self.directory = directory
-        self.name = cache_name
-        self.max_size = max_cache_size
+        self.max_size = self.conf.get("cache_size", 4e9, True)
         print "filecache max size: %s" % util.SI_byte_string(self.max_size)
 
         if not os.path.exists(self.directory):

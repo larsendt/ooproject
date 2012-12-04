@@ -1,24 +1,62 @@
-import chunk, perlin, triangle, vector
+import chunk
+import perlin
+import triangle
+import vector
+import config
 
 DELTA = 0.0001
 
-def noise(p, x, y, octaves):
-    v = 0
-    for i in range(octaves):
-        v += p.noise2(x * (2 ** i), y * (2 ** i)) / (2 * (i + 1))
+class VertexGenerator(object):
+    def __init__(self):
+        self.conf = config.Config("terrain_server.conf")
+        self.octaves = self.conf.get("perlin_octaves", 3, True)
+        self.height = self.conf.get("perlin_height", 0.25, True)
+        self.delta = self.conf.get("perlin_normal_delta", 1e-6, True)
+        self.p = perlin.SimplexNoise()
 
-    return v*0.5
+    def vert_and_norm(self, x, z):
+        h = self.noise(x, z, self.octaves)
+        hdx = self.noise(x+self.delta, z, self.octaves)
+        hdz = self.noise(x, z+self.delta, self.octaves)
+
+        v1 = vector.Vec3(x, h, z)
+        v2 = vector.Vec3(x+self.delta, hdx, z)
+        v3 = vector.Vec3(x, hdz, z+self.delta)
+
+        v = v2-v1
+        u = v3-v2
+
+        n = vector.Vec3(0, 0, 0)
+        n.x = u.y*v.z - u.z*v.y
+        n.y = u.z*v.x - u.x*v.z
+        n.z = u.x*v.y - u.y*v.x
+
+        return v1, n
+
+    def noise(self, x, y, octaves):
+        v = 0
+        for i in range(octaves):
+            v += self.p.noise2(x * (2 ** i), y * (2 ** i)) / (2 ** i)
+        return v*self.height
+
 
 class ChunkGenerator(object):
-    def __init__(self, resolution = 10, size = 1, octaves = 2):
-        self.size = size
-        self.resolution = resolution
-        self.perlin_octaves = octaves
+    def __init__(self):
+        self.conf = config.Config("terrain_server.conf")
+        self.size = self.conf.get("chunk_size", 1, True)
+        self.resolution = self.conf.get("chunk_resolution", 50, True)
+        self.vx_gen = VertexGenerator() 
+
+    def chunk_size(self):
+        return self.size
+
+    def chunk_res(self):
+        return self.resolution
+
+    def cache_attrs(self):
+        return self.size, self.resolution, self.vx_gen.octaves, self.vx_gen.height, self.vx_gen.delta
 
     def generate_chunk(self, x, z):
-        p = perlin.SimplexNoise()
-
-        # generate the initial heightmap
         vertices = []
         normals = []
         for i in range(self.resolution):
@@ -27,24 +65,9 @@ class ChunkGenerator(object):
             for j in range(self.resolution):
                 xval = (x + i) * (float(self.size) / self.resolution)
                 zval = (z + j) * (float(self.size) / self.resolution)
-                h = noise(p, xval, zval, self.perlin_octaves)
-                hdx = noise(p, xval+DELTA, zval, self.perlin_octaves)
-                hdz = noise(p, xval, zval+DELTA, self.perlin_octaves)
-    
-                v1 = vector.Vec3(xval, h, zval)
-                v2 = vector.Vec3(xval+DELTA, hdx, zval)
-                v3 = vector.Vec3(xval, hdz, zval+DELTA)
-
-                v = v2-v1
-                u = v3-v2
-
-                n = vector.Vec3(0, 0, 0)
-                n.x = u.y*v.z - u.z*v.y
-                n.y = u.z*v.x - u.x*v.z
-                n.z = u.x*v.y - u.y*v.x
-
-                varr.append(vector.Vec3(xval, h, zval))
-                narr.append(n)
+                vert, norm = self.vx_gen.vert_and_norm(xval, zval)
+                varr.append(vert)
+                narr.append(norm)
 
             vertices.append(varr)
             normals.append(narr)
