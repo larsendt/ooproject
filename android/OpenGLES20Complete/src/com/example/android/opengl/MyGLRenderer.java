@@ -67,7 +67,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	f_txcoord = txcoord;" +
         "	f_normal = normalize(nMatrix*normal);" +
         "	f_vertex = vec3(mvMatrix * vec4(vertex, 1.0));" +
-        "	vec3 lightPos = vec3(mvMatrix * vec4(1.0,.5,1.0,1.0));" +
+        "	vec3 lightPos = vec3(mvMatrix * vec4(1.0,20.0,1.0,1.0));" +
         "	f_lightPos = lightPos;" +
 
         // the matrix must be included as a modifier of gl_Position
@@ -87,15 +87,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	vec3 E = normalize(-f_vertex);" +
         "	vec3 R = normalize(-reflect(L,f_normal));" +
         
-        "	vec3 ambient = vec3(.0,.0,.1);" +
-        "	vec3 diffuse = vec3(max(dot(f_normal, L), 0.0));" +
+        "	vec3 ambient = vec3(.0,.0,.0);" +
+        "	vec3 diffuse = vec3(.4,.2,.2) * max(dot(f_normal, L), 0.0);" +
         "	diffuse = clamp(diffuse, 0.0,1.0);" +
-        "	vec3 specular = vec3(1.0)*pow(max(dot(R,E),0.0), .3);" +
+        "	vec3 specular = vec3(.1,.1,.4)*pow(max(dot(R,E),0.0), .3*30.0);" +
         "	specular = clamp(specular, 0.0,1.0);" +
         
         "	vec4 color = texture2D(tex, f_txcoord);" +
         "	vec3 intensity = vec3(color);" +
-        "	gl_FragColor = vec4(ambient+diffuse+specular + intensity, 1.0);" +
+        "	gl_FragColor = vec4(ambient+diffuse+specular, 1.0);" +
         "}";
 
     private float[] pMatrix = new float[16];
@@ -113,6 +113,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     // Declare as volatile because we are updating it from another thread
     public volatile float mxAngle;
     public volatile float myAngle;
+    public volatile float myY;
     
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -209,10 +210,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         pushMVMatrix();
         
-        Matrix.translateM(mvMatrix, 0, 0.0f,0.0f, -5.0f);
+        
         
         Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
         Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
+        
+        Matrix.translateM(mvMatrix, 0, -2.0f,-1.0f, -2.0f);
         
         shader.useProgram();
         
