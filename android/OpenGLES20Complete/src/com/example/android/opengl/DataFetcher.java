@@ -1,5 +1,6 @@
 package com.example.android.opengl;
 
+import android.os.AsyncTask;
 import android.util.Pair;
 
 import java.util.HashMap;
@@ -36,15 +37,36 @@ public class DataFetcher {
 
     public TaskStatus getChunkStatus(int x, int z) {
         Pair<Integer, Integer> key = new Pair<Integer, Integer>(x, z);
+        TaskStatus ts;
         if(m_fetcherMap.containsKey(key)) {
-            return TaskStatus.PROCESSING;
+            AsyncDataFetcher df = m_fetcherMap.get(key);
+
+            if(df.getStatus() == AsyncTask.Status.FINISHED) {
+                ts = TaskStatus.DONE;
+            }
+            else if(df.getStatus() == AsyncTask.Status.PENDING ||
+                    df.getStatus() == AsyncTask.Status.RUNNING) {
+                ts = TaskStatus.PROCESSING;
+            }
+            else {
+                ts = TaskStatus.NOSUCHCHUNK;
+            }
         }
         else {
-            return TaskStatus.NOSUCHCHUNK;
+            ts = TaskStatus.NOSUCHCHUNK;
         }
+        return ts;
     }
 
     public float[] getChunkData(int x, int z) {
-        return new float[3];
+        float[] data = null;
+        Pair<Integer, Integer> key = new Pair<Integer, Integer>(x, z);
+
+        if(m_fetcherMap.containsKey(key) && m_fetcherMap.get(key).getStatus() == AsyncTask.Status.FINISHED) {
+            AsyncDataFetcher df = m_fetcherMap.remove(key);
+            data = df.getChunkData();
+        }
+
+        return data;
     }
 }

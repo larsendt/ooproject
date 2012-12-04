@@ -197,8 +197,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         	
         	int SIZE_OF_VERTEX_PACKAGE = 8;
         	
-        	float[] vertex_data = m_dataFetcher.getVertexData();
-        	
+        	//float[] vertex_data = m_dataFetcher.getVertexData();
+        	float[] vertex_data = new float[24];
+
         	int num_indices = vertex_data.length / SIZE_OF_VERTEX_PACKAGE;
         	
             int[] index_data = new int[num_indices];
