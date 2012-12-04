@@ -1,11 +1,9 @@
 package com.example.android.opengl;
 
-public class World {
+public class Chunk {
 
-	public World() {
+	public Chunk() {
 		// TODO Auto-generated constructor stub
 	}
-
-	
 
 }
