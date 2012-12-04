@@ -90,7 +90,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	vec3 ambient = vec3(.0,.0,.0);" +
         "	vec3 diffuse = vec3(1.0) * max(dot(L, f_normal), 0.0);" +
         "	diffuse = clamp(diffuse, 0.0,1.0);" +
-        "	vec3 specular = vec3(1.0)*pow(max(dot(R,E),0.0), .3*30.0);" +
+        "	vec3 specular = vec3(.2)*pow(max(dot(R,E),0.0), .3*10.0);" +
         "	specular = clamp(specular, 0.0,1.0);" +
         
         "	vec4 color = texture2D(tex, f_txcoord);" +
@@ -140,12 +140,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
     
         
-        pix_buf.put((byte)255);pix_buf.put((byte)255);pix_buf.put((byte)255);
+        pix_buf.put((byte)0);pix_buf.put((byte)255);pix_buf.put((byte)255);
         
         pix_buf.put((byte)0);pix_buf.put((byte)0);pix_buf.put((byte)0);
         pix_buf.put((byte)0);pix_buf.put((byte)0);pix_buf.put((byte)0);
         
-        pix_buf.put((byte)255);pix_buf.put((byte)255);pix_buf.put((byte)255);
+        pix_buf.put((byte)0);pix_buf.put((byte)255);pix_buf.put((byte)255);
         
         IntBuffer ib = IntBuffer.allocate(1);
         
