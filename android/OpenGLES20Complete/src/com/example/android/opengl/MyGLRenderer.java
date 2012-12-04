@@ -31,6 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
@@ -90,11 +91,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	vec3 ambient = vec3(.0,.0,.0);" +
         "	vec3 diffuse = vec3(1.0) * max(dot(L, f_normal), 0.0);" +
         "	diffuse = clamp(diffuse, 0.0,1.0);" +
-        "	vec3 specular = vec3(.2)*pow(max(dot(R,E),0.0), .3*10.0);" +
+        "	vec3 specular = vec3(.2)*pow(max(dot(R,E),0.0), .3);" +
         "	specular = clamp(specular, 0.0,1.0);" +
         
-        "	vec4 color = texture2D(tex, f_txcoord);" +
-        "	vec3 intensity = vec3(color)*diffuse;" +
+        "	vec4 color = texture2D(tex, f_txcoord*10.0);" +
+        "	vec3 intensity = vec3(color) * diffuse;" +
         "	gl_FragColor = vec4(ambient+intensity+specular, 1.0);" +
         "}";
 
@@ -129,6 +130,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         vbo = new VBO(shader.getProgram());
         checkGlError("vbo");
         
+        
+        Log.d(TAG, "127 is " + Byte.toString((byte)127));
+        
         m_dataFetcher = new DataFetcher();
         m_dataFetcher.execute("banana");
         
@@ -136,16 +140,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
         
         
+        Bitmap myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.RGB_565);
+        
+        myBitmap.setPixel(0, 0, Color.BLACK);
+        myBitmap.setPixel(0, 1, Color.WHITE);
+        myBitmap.setPixel(1, 0, Color.BLACK);
+        myBitmap.setPixel(1, 1, Color.WHITE);
+        
+        
+        
         ByteBuffer pix_buf = ByteBuffer.allocate(3*4);
         
-    
+        myBitmap.copyPixelsToBuffer(pix_buf);
         
-        pix_buf.put((byte)0);pix_buf.put((byte)255);pix_buf.put((byte)255);
-        
-        pix_buf.put((byte)0);pix_buf.put((byte)0);pix_buf.put((byte)0);
-        pix_buf.put((byte)0);pix_buf.put((byte)0);pix_buf.put((byte)0);
-        
-        pix_buf.put((byte)0);pix_buf.put((byte)255);pix_buf.put((byte)255);
         
         IntBuffer ib = IntBuffer.allocate(1);
         
