@@ -76,6 +76,7 @@ class MyGLSurfaceView extends GLSurfaceView {
 
         // Render the view only when there is a change in the drawing data
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        
     }
 
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
@@ -90,7 +91,6 @@ class MyGLSurfaceView extends GLSurfaceView {
 
         float x = e.getX();
         float y = e.getY();
-
         switch (e.getAction()) {
             case MotionEvent.ACTION_MOVE:
             	
@@ -109,11 +109,19 @@ class MyGLSurfaceView extends GLSurfaceView {
 
                 mRenderer.mxAngle += (dy * Math.PI / 10.0f) * TOUCH_SCALE_FACTOR;  // = 180.0f / 320
                 mRenderer.myAngle += (dx * Math.PI / 10.0f) * TOUCH_SCALE_FACTOR;
+                
                 requestRender();
         }
+        
+        
 
         mPreviousX = x;
         mPreviousY = y;
         return true;
+    }
+    
+    public void run(){
+    		mRenderer.myY += .1;
+    		
     }
 }
