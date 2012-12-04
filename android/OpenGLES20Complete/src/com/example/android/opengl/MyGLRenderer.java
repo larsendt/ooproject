@@ -57,16 +57,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "attribute vec3 normal;" +
         "attribute vec2 txcoord;" +
         "varying vec2 f_txcoord;" +
-        "varying float light;" +
+        "varying vec3 f_lightPos;" +
+        "varying vec3 f_normal;" +
+        "varying vec3 f_vertex;" +
 
 
         "void main() {" +
         "	gl_PointSize = 3.0;" +
         "	f_txcoord = txcoord;" +
-        "	vec3 lightPos = vec3(mvMatrix * vec4(0.0,.5,0.0,1.0));" +
-        "	vec3 vxPos = vec3(mvMatrix * vec4(vertex, 1.0));" +
-        "   vec3 lightvec = normalize(vec3(lightPos - vxPos));" +
-        "	light = dot(lightvec, normalize(nMatrix*normal));" +
+        "	f_normal = normalize(nMatrix*normal);" +
+        "	f_vertex = vec3(mvMatrix * vec4(vertex, 1.0));" +
+        "	vec3 lightPos = vec3(mvMatrix * vec4(1.0,.5,1.0,1.0));" +
+        "	f_lightPos = lightPos;" +
 
         // the matrix must be included as a modifier of gl_Position
         "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
@@ -75,12 +77,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final String fragmentShaderCode =
         "precision mediump float;" +
         "uniform sampler2D tex;" +
-        "varying float light;" +
         "varying vec2 f_txcoord;" +
+        "varying vec3 f_lightPos;" +
+        "varying vec3 f_normal;" +
+        "varying vec3 f_vertex;" +
+        
         "void main() {" +
+        "	vec3 L = normalize(f_lightPos - f_vertex); " +
+        "	vec3 E = normalize(-f_vertex);" +
+        "	vec3 R = normalize(-reflect(L,f_normal));" +
+        
+        "	vec3 ambient = vec3(.0,.0,.1);" +
+        "	vec3 diffuse = vec3(max(dot(f_normal, L), 0.0));" +
+        "	diffuse = clamp(diffuse, 0.0,1.0);" +
+        "	vec3 specular = vec3(1.0)*pow(max(dot(R,E),0.0), .3);" +
+        "	specular = clamp(specular, 0.0,1.0);" +
+        
         "	vec4 color = texture2D(tex, f_txcoord);" +
         "	vec3 intensity = vec3(color);" +
-        "	gl_FragColor = vec4(vec3(1.0)*light + vec3(.1) + intensity, 1.0);" +
+        "	gl_FragColor = vec4(ambient+diffuse+specular + intensity, 1.0);" +
         "}";
 
     private float[] pMatrix = new float[16];
