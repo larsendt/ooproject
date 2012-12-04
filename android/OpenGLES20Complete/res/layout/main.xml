@@ -14,10 +14,59 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:columnCount="2"
-    android:orientation="vertical" >
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
-</GridLayout>
+
+        <view
+            android:id="@+id/glsurface"
+            android:layout_width="fill_parent"
+            android:layout_height="875dp"
+            class="com.example.android.opengl.MyGLSurfaceView"
+            android:fadingEdge="vertical"
+            android:padding="10dip"
+            android:scrollbars="vertical" />
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="1049dp" >
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_gravity="left"
+                android:layout_row="0"
+                android:onClick="switchView"
+                android:text="@string/switch_view" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_gravity="left"
+                android:layout_row="0"
+                android:onClick="moveDown"
+                android:text="@string/move_down" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="172dp"
+                android:layout_height="231dp"
+                android:layout_column="2"
+                android:layout_gravity="right"
+                android:layout_row="0"
+                android:text="@string/textbox" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="2"
+                android:layout_gravity="left"
+                android:layout_row="0"
+                android:onClick="moveUp"
+                android:text="@string/move_up" />
+        </GridLayout>
+
+</FrameLayout>

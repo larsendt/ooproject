@@ -70,7 +70,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	f_txcoord = txcoord;" +
         "	f_normal = normalize(nMatrix*normal);" +
         "	f_vertex = vec3(mvMatrix * vec4(vertex, 1.0));" +
-        "	vec3 lightPos = vec3(mvMatrix * vec4(2.0,.5,2.0,1.0));" +
+        "	vec3 lightPos = vec3(mvMatrix * vec4(0.0,.5,0.0,1.0));" +
         "	f_lightPos = lightPos;" +
 
         // the matrix must be included as a modifier of gl_Position
@@ -90,12 +90,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         "	vec3 E = normalize(-f_vertex);" +
         "	vec3 R = normalize(-reflect(L,f_normal));" +
         "	vec3 ambient = vec3(.0,.0,.0);" +
-        "	vec3 diffuse = vec3(.8) * max(dot(L, f_normal), 0.0);" +
+        "	vec3 diffuse = vec3(.6) * max(dot(L, f_normal), 0.0);" +
         "	diffuse = clamp(diffuse, 0.0,1.0);" +
         "	vec3 specular = vec3(.15)*pow(max(dot(R,E),0.0), .3 * 30.0);" +
         "	specular = clamp(specular, 0.0,1.0);" +
         
-        "	vec4 color = texture2D(tex, f_txcoord*2.0);" +
+        "	vec4 color = texture2D(tex, f_txcoord*.1);" +
         "	vec3 intensity = vec3(color) * diffuse;" +
         "	gl_FragColor = vec4(ambient+intensity+specular, 1.0);" +
         "}";
@@ -115,7 +115,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     // Declare as volatile because we are updating it from another thread
     public volatile float mxAngle;
     public volatile float myAngle;
-    public volatile float myY;
+    public volatile float mY = 1;
+    
+    public volatile int view;
+    
+    
     private Context mContext;
 
     public void setContext(Context context){
@@ -129,10 +133,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     	
     	Log.d(TAG, "==============\nStarting glstuff");
     	
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    	view = 1;
+    	
+        GLES20.glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        
-        
+
         shader = new Shader(vertexShaderCode, fragmentShaderCode);
 
         vbo = new VBO(shader.getProgram());
@@ -221,10 +226,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         pushMVMatrix();
         
         
-        Matrix.translateM(mvMatrix, 0, 0.0f, 0.0f, -4.0f);
+        if (view == 1){
+        
+        Matrix.translateM(mvMatrix, 0, 0.0f, 0.0f, -mY);
+        
         Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
         Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
         Matrix.translateM(mvMatrix, 0, -2.0f,0.0f, -2.0f);
+        }
+        
+        else if (view == 0){
+        	
+            
+            Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
+            Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
+            
+            Matrix.translateM(mvMatrix, 0, -2.0f,-mY, -2.0f);
+        }
         
         
         shader.useProgram();

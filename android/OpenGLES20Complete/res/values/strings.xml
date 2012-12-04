@@ -17,5 +17,9 @@
 
     <string name="hello">Hello, OpenGL ES 2.0!</string>
     <string name="app_name">SHOGGOTH</string>
+    <string name="switch_view">Switch View</string>
+    <string name="move_up">Up</string>
+    <string name="move_down">Down</string>
+    <string name="textbox">"HELLO</string>
 
 </resources>

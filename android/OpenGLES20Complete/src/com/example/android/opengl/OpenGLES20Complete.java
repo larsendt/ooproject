@@ -20,12 +20,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 
 public class OpenGLES20Complete extends Activity {
 
-    private GLSurfaceView mGLView;
+    private MyGLSurfaceView mGLView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,9 +38,34 @@ public class OpenGLES20Complete extends Activity {
         
         // Create a GLSurfaceView instance and set it
         // as the ContentView for this Activity
-        mGLView = new MyGLSurfaceView(this);
-        setContentView(mGLView);
+        //mGLView = new MyGLSurfaceView(this);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.main);
+        mGLView = (MyGLSurfaceView) findViewById(R.id.glsurface);
+        if (mGLView == null){
+        	Log.d("OO", "Surface grabbed from the layout was null");
+        }
+        //addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
+    
+    public void switchView(View view){
+    	
+    	mGLView.switchView();
+    	
+    }
+    
+    public void moveUp(View view){
+    	
+    	mGLView.moveUp();
+    	
+    }
+    
+public void moveDown(View view){
+    	
+    	mGLView.moveDown();
+    	
+    }
+
 
     @Override
     protected void onPause() {
@@ -58,71 +87,3 @@ public class OpenGLES20Complete extends Activity {
     }
 }
 
-class MyGLSurfaceView extends GLSurfaceView {
-
-    private final MyGLRenderer mRenderer;
-
-    public Context myContext;
-    
-    public MyGLSurfaceView(Context context) {
-        super(context);
-        myContext = context;
-        // Create an OpenGL ES 2.0 context.
-        setEGLContextClientVersion(2);
-
-        // Set the Renderer for drawing on the GLSurfaceView
-        mRenderer = new MyGLRenderer();
-        setRenderer(mRenderer);
-        mRenderer.setContext(context);
-
-        // Render the view only when there is a change in the drawing data
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        
-    }
-
-    private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
-    private float mPreviousX;
-    private float mPreviousY;
-
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        // MotionEvent reports input details from the touch screen
-        // and other input controls. In this case, you are only
-        // interested in events where the touch position changed.
-
-        float x = e.getX();
-        float y = e.getY();
-        switch (e.getAction()) {
-            case MotionEvent.ACTION_MOVE:
-            	
-                float dx = x - mPreviousX;
-                float dy = y - mPreviousY;
-
-                // reverse direction of rotation above the mid-line
-                //if (y > getHeight() / 2) {
-                //  dx = dx * -1 ;
-                //}
-
-                // reverse direction of rotation to left of the mid-line
-                //if (x < getWidth() / 2) {
-                //  dy = dy * -1 ;
-                //}
-
-                mRenderer.mxAngle += (dy * Math.PI / 10.0f) * TOUCH_SCALE_FACTOR;  // = 180.0f / 320
-                mRenderer.myAngle += (dx * Math.PI / 10.0f) * TOUCH_SCALE_FACTOR;
-                
-                requestRender();
-        }
-        
-        
-
-        mPreviousX = x;
-        mPreviousY = y;
-        return true;
-    }
-    
-    public void run(){
-    		mRenderer.myY += .1;
-    		
-    }
-}
