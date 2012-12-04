@@ -7,12 +7,13 @@ def noise(p, x, y, octaves):
     for i in range(octaves):
         v += p.noise2(x * (2 ** i), y * (2 ** i)) / (2 * (i + 1))
 
-    return v
+    return v*0.5
 
 class ChunkGenerator(object):
-    def __init__(self, resolution = 10, size = 1):
+    def __init__(self, resolution = 10, size = 1, octaves = 2):
         self.size = size
         self.resolution = resolution
+        self.perlin_octaves = octaves
 
     def generate_chunk(self, x, z):
         p = perlin.SimplexNoise()
@@ -26,9 +27,9 @@ class ChunkGenerator(object):
             for j in range(self.resolution):
                 xval = (x + i) * (float(self.size) / self.resolution)
                 zval = (z + j) * (float(self.size) / self.resolution)
-                h = noise(p, xval, zval, 2)
-                hdx = noise(p, xval+DELTA, zval, 2)
-                hdz = noise(p, xval, zval+DELTA, 2)
+                h = noise(p, xval, zval, self.perlin_octaves)
+                hdx = noise(p, xval+DELTA, zval, self.perlin_octaves)
+                hdz = noise(p, xval, zval+DELTA, self.perlin_octaves)
     
                 v1 = vector.Vec3(xval, h, zval)
                 v2 = vector.Vec3(xval+DELTA, hdx, zval)
