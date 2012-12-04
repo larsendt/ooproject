@@ -24,7 +24,7 @@ import android.util.Log;
 import org.json.JSONTokener;
 
 public class AsyncDataFetcher extends AsyncTask<String, Integer, String> {
-    private float[] m_vertexData;
+    private float[] m_chunkData;
 
 	@Override
 	protected String doInBackground(String... params) {
@@ -32,13 +32,13 @@ public class AsyncDataFetcher extends AsyncTask<String, Integer, String> {
         HttpClient httpclient = new DefaultHttpClient();
         HttpResponse response;
 
-        Log.d(MyGLRenderer.TAG, "Requesting chunk data");
+        Log.d(MyGLRenderer.TAG, "Requesting url: " + params[0]);
 
         try {
-            response = httpclient.execute(new HttpGet("http://larsendt.com:1234/?x=0&y=0&compression=yes"));
+            response = httpclient.execute(new HttpGet(params[0]));
         } catch (IOException e) {
             Log.d(MyGLRenderer.TAG, "HttpResponse broke...");
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
             return "";
         }
 
@@ -53,7 +53,6 @@ public class AsyncDataFetcher extends AsyncTask<String, Integer, String> {
                 return "";
             }
             String input_json = out.toString();
-            //Log.d(MyGLRenderer.TAG, "response is" + input_json);
             Log.d(MyGLRenderer.TAG, "Got chunk data");
             return input_json;
         }
@@ -151,10 +150,10 @@ public class AsyncDataFetcher extends AsyncTask<String, Integer, String> {
             ByteBuffer buf = ByteBuffer.wrap(decoded_data);
             buf.order(ByteOrder.BIG_ENDIAN);
             FloatBuffer vert_data = buf.asFloatBuffer();
-            m_vertexData = new float[decoded_data.length/4];
+            m_chunkData = new float[decoded_data.length/4];
 
-            for(int i = 0; i < m_vertexData.length; i++) {
-                m_vertexData[i] = vert_data.get(i);
+            for(int i = 0; i < m_chunkData.length; i++) {
+                m_chunkData[i] = vert_data.get(i);
             }
         }
         else {
@@ -164,7 +163,7 @@ public class AsyncDataFetcher extends AsyncTask<String, Integer, String> {
         Log.d(MyGLRenderer.TAG, "Done");
     }
 
-	public float[] getVertexData() {
-        return m_vertexData;
+	public float[] getChunkData() {
+        return m_chunkData;
     }
 }
