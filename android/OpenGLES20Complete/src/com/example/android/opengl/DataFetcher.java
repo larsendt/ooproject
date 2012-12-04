@@ -34,7 +34,7 @@ public class DataFetcher extends AsyncTask<String, Integer, String> {
         Log.d(MyGLRenderer.TAG, "Requesting chunk data");
 
         try {
-            response = httpclient.execute(new HttpGet("http://larsendt.com:1234/?x=0&y=0&compression=no"));
+            response = httpclient.execute(new HttpGet("http://larsendt.com:1234/?x=0&y=0&compression=yes"));
         } catch (IOException e) {
             Log.d(MyGLRenderer.TAG, "HttpResponse broke...");
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -104,17 +104,17 @@ public class DataFetcher extends AsyncTask<String, Integer, String> {
 
             byte[] decoded_data = Base64.decode(chunk_string, 0);
             Log.d(MyGLRenderer.TAG, "Decoded chunk data from Base64");
-            String compression;
+            boolean compression;
             try {
-                compression = obj.getString("compression");
+                compression = obj.getBoolean("compression");
             } catch(JSONException e) {
                 Log.d(MyGLRenderer.TAG, "JSON object didn't have compression flag, assuming no compression");
                 e.printStackTrace();
-                compression = "no";
+                compression = false;
                 Log.d(MyGLRenderer.TAG, "Assuming no compression (server didn't send compression flag");
             }
 
-            if(compression == "yes") {
+            if(compression) {
                 Log.d(MyGLRenderer.TAG, "Chunk data is compressed");
                 Inflater inf = new Inflater();
                 inf.setInput(decoded_data);
