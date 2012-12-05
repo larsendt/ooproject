@@ -1,0 +1,21 @@
+precision mediump float;
+uniform sampler2D tex;
+varying vec2 f_txcoord;
+varying vec3 f_lightPos;
+varying vec3 f_normal;
+varying vec3 f_vertex;
+
+void main() {
+    vec3 L = normalize(f_lightPos - f_vertex); 
+    vec3 E = normalize(-f_vertex);
+    vec3 R = normalize(-reflect(L,f_normal));
+    vec3 ambient = vec3(0.1);
+    vec3 diffuse = vec3(0.6) * max(dot(L, f_normal), 0.0);
+    diffuse = clamp(diffuse, 0.0,1.0);
+    vec3 specular = vec3(.4)*pow(max(dot(R,E),0.0), 15.0);
+    specular = clamp(specular, 0.0,1.0);
+
+    vec4 color = texture2D(tex, f_txcoord*.1);
+    vec3 intensity = vec3(color) * diffuse;
+    gl_FragColor = vec4(ambient+intensity+specular, 1.0);
+};
