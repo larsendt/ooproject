@@ -9,18 +9,13 @@ public class Shader {
 	
 	public Shader(String vertCode, String fragCode)
 	{
-
-        
-        
-        int vertexShader = compileShader(GLES20.GL_VERTEX_SHADER,
-                vertCode);
-		int fragmentShader = compileShader(GLES20.GL_FRAGMENT_SHADER,
-		                  fragCode);
+        int vertexShader = compileShader(GLES20.GL_VERTEX_SHADER, vertCode);
+		int fragmentShader = compileShader(GLES20.GL_FRAGMENT_SHADER, fragCode);
 		
-		program = GLES20.glCreateProgram();             // create empty OpenGL Program
-		GLES20.glAttachShader(program, vertexShader);   // add the vertex shader to program
-		GLES20.glAttachShader(program, fragmentShader); // add the fragment shader to program
-		GLES20.glLinkProgram(program);                  // create OpenGL program executables
+		program = GLES20.glCreateProgram();
+		GLES20.glAttachShader(program, vertexShader);
+		GLES20.glAttachShader(program, fragmentShader);
+		GLES20.glLinkProgram(program);
 
 		Log.d(MyGLRenderer.TAG, "Vertex compo log" + GLES20.glGetShaderInfoLog(vertexShader));
 		Log.d(MyGLRenderer.TAG, "Fragment compo log" + GLES20.glGetShaderInfoLog(fragmentShader));
@@ -105,15 +100,12 @@ public class Shader {
 	
 	private int compileShader(int type, String shaderCode)
 	{
-		// create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shaderProgram = GLES20.glCreateShader(type);
 
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource(shaderProgram, shaderCode);
-        GLES20.glCompileShader(shaderProgram);
+        int shader= GLES20.glCreateShader(type);
+        GLES20.glShaderSource(shader, shaderCode);
+        GLES20.glCompileShader(shader);
         MyGLRenderer.checkGlError("compileShader");
-        return shaderProgram;
+        return shader;
 		
 	}
 	

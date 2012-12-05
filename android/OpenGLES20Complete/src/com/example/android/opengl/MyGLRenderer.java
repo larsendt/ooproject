@@ -143,7 +143,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         vbo = new VBO(shader.getProgram());
         
         m_dataFetcher = new AsyncDataFetcher();
-        m_dataFetcher.execute("banana");
+        m_dataFetcher.execute("http://larsendt.com:1234/?x=0&z=0&compression=yes");
         
         Matrix.setIdentityM(pMatrix, 0);
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
@@ -196,19 +196,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk ) {
         	
         	int SIZE_OF_VERTEX_PACKAGE = 8;
-        	
-        	//float[] vertex_data = m_dataFetcher.getVertexData();
-        	float[] vertex_data = new float[24];
+        	float[] vertex_data = m_dataFetcher.getChunkData();
 
         	int num_indices = vertex_data.length / SIZE_OF_VERTEX_PACKAGE;
-        	
             int[] index_data = new int[num_indices];
 
-            for (int i = 0; i < vertex_data.length; i+=SIZE_OF_VERTEX_PACKAGE){
-            	//Log.d(TAG, Float.toString(vertex_data[i+3]) + "/" + Float.toString(vertex_data[i+3]) + "/" + Float.toString(vertex_data[i+3]));
-            	
-            }
-            
             for(int i = 0; i < index_data.length; i++) {
                 index_data[i] = i;
             }
