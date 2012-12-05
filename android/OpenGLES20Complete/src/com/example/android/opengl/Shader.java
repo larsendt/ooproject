@@ -11,16 +11,25 @@ public class Shader {
 	{
         int vertexShader = compileShader(GLES20.GL_VERTEX_SHADER, vertCode);
 		int fragmentShader = compileShader(GLES20.GL_FRAGMENT_SHADER, fragCode);
-		
+
 		program = GLES20.glCreateProgram();
+
+        if(program == 0) {
+            throw new RuntimeException("Could not create shader program");
+        }
+
 		GLES20.glAttachShader(program, vertexShader);
 		GLES20.glAttachShader(program, fragmentShader);
 		GLES20.glLinkProgram(program);
 
-		Log.d(MyGLRenderer.TAG, "Vertex compo log" + GLES20.glGetShaderInfoLog(vertexShader));
-		Log.d(MyGLRenderer.TAG, "Fragment compo log" + GLES20.glGetShaderInfoLog(fragmentShader));
-		Log.d(MyGLRenderer.TAG, "Program compo log" + GLES20.glGetProgramInfoLog(program));
-		
+        int[] status = new int[1];
+        GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, status, 0);
+        if(status[0] == GLES20.GL_TRUE) {
+            Log.d(MyGLRenderer.TAG, "Linked shader program (id:" + program + ")");
+        }
+        else {
+            throw new RuntimeException("Program link error:" + GLES20.glGetProgramInfoLog(program));
+        }
 	}
 	
 	public int getProgram()
@@ -102,9 +111,35 @@ public class Shader {
 	{
 
         int shader= GLES20.glCreateShader(type);
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-        MyGLRenderer.checkGlError("compileShader");
+
+        if(shader == 0) {
+            throw new RuntimeException("Could not create shader");
+        }
+        else {
+
+            GLES20.glShaderSource(shader, shaderCode);
+            GLES20.glCompileShader(shader);
+
+            int[] status = new int[1];
+            GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
+            if(status[0] == GLES20.GL_TRUE) {
+                if(type == GLES20.GL_VERTEX_SHADER) {
+                    Log.d(MyGLRenderer.TAG, "Compiled vertex shader (id:" + shader +")");
+                }
+                else {
+                    Log.d(MyGLRenderer.TAG, "Compiled fragment shader (id:" + shader + ")");
+                }
+            }
+            else {
+                if(type == GLES20.GL_VERTEX_SHADER) {
+                    throw new RuntimeException("Vertex shader compile error: " + GLES20.glGetShaderInfoLog(shader));
+                }
+                else {
+                    throw new RuntimeException("Fragment shader compile error: " + GLES20.glGetShaderInfoLog(shader));
+                }
+            }
+        }
+
         return shader;
 		
 	}
