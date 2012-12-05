@@ -4,7 +4,8 @@ varying vec3 f_lightPos;
 varying vec3 f_normal;
 varying vec3 f_vertex;
 
-void main() {
+void main()
+{
     vec3 L = normalize(f_lightPos - f_vertex); 
     vec3 E = normalize(-f_vertex);
     vec3 R = normalize(-reflect(L,f_normal));
@@ -17,5 +18,5 @@ void main() {
     vec4 color = texture2D(tex, f_txcoord*.1);
     vec3 intensity = vec3(color) * diffuse;
     gl_FragColor = vec4(ambient+intensity+specular, 1.0);
-};
+}
 
