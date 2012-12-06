@@ -35,7 +35,7 @@ public class World {
 	        "	f_txcoord = txcoord;" +
 	        "	f_normal = normalize(nMatrix*normal);" +
 	        "	f_vertex = vec3(mvMatrix * vec4(vertex, 1.0));" +
-	        "	vec3 lightPos = vec3(mvMatrix * vec4(0.0,.5,0.0,1.0));" +
+	        "	vec3 lightPos = vec3( vec4(0.0,10,0.0,1.0));" +
 	        "	f_lightPos = lightPos;" +
 
 	        // the matrix must be included as a modifier of gl_Position
