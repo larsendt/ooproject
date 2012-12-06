@@ -33,6 +33,8 @@ import java.util.Stack;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import com.example.android.opengl.DataFetcher.TaskStatus;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -53,7 +55,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Shader shader;
     private VBO vbo;
     private boolean m_hasChunk = false;
-    AsyncDataFetcher m_dataFetcher;
+    DataFetcher m_dataFetcher;
 
     private String vertexShaderCode;
     private String fragmentShaderCode;
@@ -76,6 +78,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public volatile float mY = 1;
 
     public volatile int view;
+    
+    private World w;
 
 
     private Context mContext;
@@ -85,6 +89,50 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mContext = context;
     }
 
+    public void initGL(){
+    	
+    	GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        IntBuffer ib = IntBuffer.allocate(1);
+        GLES20.glGenTextures(1, ib);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+        checkGlError("gen texture");
+
+        
+        texture = ib.get();
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+
+        checkGlError("bind texture");
+
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+
+        Bitmap myBitmap;
+        try {
+            myBitmap = BitmapFactory.decodeStream( mContext.getResources().getAssets().open("rock.bmp"));
+            if (myBitmap == null){
+                Log.d(TAG, "ASDF");
+            }
+        } catch (IOException e) {
+            // farts
+            e.printStackTrace();
+            myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
+
+            myBitmap.setPixel(0, 0, Color.WHITE);
+            myBitmap.setPixel(0, 1, Color.CYAN);
+            myBitmap.setPixel(1, 0, Color.CYAN);
+            myBitmap.setPixel(1, 1, Color.WHITE);
+        }
+        
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, myBitmap, 0);
+
+        checkGlError("TexImage");
+        
+    	
+    }
+    
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame color
@@ -93,8 +141,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         view = 1;
 
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        
 
         try {
             Resources res = mContext.getResources();
@@ -120,7 +167,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             }
 
             fragmentShaderCode = out.toString("US-ASCII");
-            Log.d(MyGLRenderer.TAG, fragmentShaderCode);
+            //Log.d(MyGLRenderer.TAG, fragmentShaderCode);
 
 
         } catch(Exception e) {
@@ -132,61 +179,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         vbo = new VBO(shader.getProgram());
 
-        m_dataFetcher = new AsyncDataFetcher();
-        m_dataFetcher.execute("http://larsendt.com:1234/?x=0&z=0&compression=yes");
-
+        //m_dataFetcher = new AsyncDataFetcher();
+        //m_dataFetcher.execute("http://larsendt.com:1234/?x=0&z=0&compression=yes");
+        
+        m_dataFetcher = new DataFetcher();
+        
         Matrix.setIdentityM(pMatrix, 0);
         Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
 
-
-
-        Bitmap myBitmap;
-        try {
-            myBitmap = BitmapFactory.decodeStream( mContext.getResources().getAssets().open("rock.bmp"));
-            if (myBitmap == null){
-                Log.d(TAG, "ASDF");
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            // farts
-            e.printStackTrace();
-            myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
-
-            myBitmap.setPixel(0, 0, Color.WHITE);
-            myBitmap.setPixel(0, 1, Color.CYAN);
-            myBitmap.setPixel(1, 0, Color.CYAN);
-            myBitmap.setPixel(1, 1, Color.WHITE);
-        }
-
-
-        IntBuffer ib = IntBuffer.allocate(1);
-
-        GLES20.glGenTextures(1, ib);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-
-        checkGlError("gen texture");
-
-        texture = ib.get();
-
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
-
-        checkGlError("bind texture");
-
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, myBitmap, 0);
-
-        checkGlError("TexImage");
-
+        initGL();
+        w = new World(m_dataFetcher, shader);
+        w.loadAround(0, 0);
     }
 
     public void onDrawFrame(GL10 unused) {
 
-        if(m_dataFetcher.getStatus() == AsyncTask.Status.FINISHED && !m_hasChunk ) {
+        /*if(m_dataFetcher.getChunkStatus(0,0) == TaskStatus.DONE && !m_hasChunk ) {
 
             int SIZE_OF_VERTEX_PACKAGE = 8;
-            float[] vertex_data = m_dataFetcher.getChunkData();
+            float[] vertex_data = m_dataFetcher.getChunkData(0,0);
 
             int num_indices = vertex_data.length / SIZE_OF_VERTEX_PACKAGE;
             int[] index_data = new int[num_indices];
@@ -199,38 +210,39 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             MyGLRenderer.checkGlError("vbo setBuffers");
             m_hasChunk = true;
             Log.d(MyGLRenderer.TAG, "Vertex buffer complete");
-        }
+        }*/
 
+    	w.update();
+    	
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        Matrix.setIdentityM(mvMatrix, 0);
+        GLState.setMVIdentity();
 
-        pushMVMatrix();
+        GLState.pushMVMatrix();
 
 
         if (view == 1){
 
-            Matrix.translateM(mvMatrix, 0, 0.0f, 0.0f, -mY);
-
-            Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
-            Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
-            Matrix.translateM(mvMatrix, 0, -2.0f,0.0f, -2.0f);
+            GLState.translate(0,0,-mY);
+            GLState.rotate(mxAngle, 1f, 0, 0);
+            GLState.rotate(myAngle, 0,1f,0);
+            GLState.translate(-2f,0,-2f);
         }
 
         else if (view == 0){
 
 
-            Matrix.rotateM(mvMatrix, 0, mxAngle, 1.0f, 0.0f, 0.0f);
-            Matrix.rotateM(mvMatrix, 0, myAngle, 0, 1.0f, 0.0f);
-
-            Matrix.translateM(mvMatrix, 0, -2.0f,-mY, -2.0f);
+            GLState.rotate(mxAngle, 1f, 0, 0);
+            GLState.rotate(myAngle, 0,1f,0);
+            GLState.translate(-2f,-mY,-2f);
+            
         }
 
 
         shader.useProgram();
 
-        setNMatrix();
+        
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture);
@@ -240,38 +252,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         checkGlError("active texture");
 
-        shader.setUniform1i("tex", 0);
+        
+        w.draw();
 
-        shader.setMatrices(mvMatrix, pMatrix, nMatrix);
-        vbo.draw();
-
-        popMVMatrix();
+        GLState.popMVMatrix();
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
         float ratio = (float) width / height;
-        Matrix.setIdentityM(pMatrix, 0);
-        Matrix.perspectiveM(pMatrix, 0, 60.0f, ratio, .1f,100.0f);
+        Matrix.setIdentityM(GLState.pMatrix, 0);
+        Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, ratio, .1f,100.0f);
     }
 
-    private void setNMatrix(){
-
-        Matrix.invertM(nInvertMatrix, 0, mvMatrix, 0);
-        Matrix.transposeM(nInvertTransposeMatrix, 0,nInvertMatrix, 0);
-
-        nMatrix[0] = nInvertTransposeMatrix[0];
-        nMatrix[1] = nInvertTransposeMatrix[1];
-        nMatrix[2] = nInvertTransposeMatrix[2];
-
-        nMatrix[3] = nInvertTransposeMatrix[4];
-        nMatrix[4] = nInvertTransposeMatrix[5];
-        nMatrix[5] = nInvertTransposeMatrix[6];
-
-        nMatrix[6] = nInvertTransposeMatrix[8];
-        nMatrix[7] = nInvertTransposeMatrix[9];
-        nMatrix[8] = nInvertTransposeMatrix[10];
-    }
 
 
     /**
@@ -294,18 +287,4 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    private void pushMVMatrix(){
-        modelviewStack.push(mvMatrix);
-    }
-
-    private void popMVMatrix(){
-        mvMatrix = Arrays.copyOf(modelviewStack.pop(), 16);
-    }
-
-    private void pushPMatrix(){
-        projectionStack.push(pMatrix);
-    }
-    private void popPMatrix(){
-        pMatrix = Arrays.copyOf(projectionStack.pop(), 16);
-    }
 }

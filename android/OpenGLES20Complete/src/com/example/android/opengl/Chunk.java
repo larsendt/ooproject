@@ -3,8 +3,8 @@ package com.example.android.opengl;
 public class Chunk {
 
 	private VBO drawable;
-	private int x;
-	private int z;
+	public int x;
+	public int z;
 	
 	public Chunk(float vertices[], int indices[], int shaderProgram) {
 
@@ -13,6 +13,7 @@ public class Chunk {
 		
 	}
 	public void draw(){
+		
 		drawable.draw();
 	}
 }

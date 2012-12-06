@@ -9,6 +9,8 @@ import java.util.ListIterator;
 import java.util.Queue;
 import java.util.Vector;
 
+import android.util.Log;
+
 import com.example.android.opengl.DataFetcher.TaskStatus;
 
 public class World {
@@ -85,13 +87,26 @@ public class World {
 		while (it.hasNext()){
 			
 			Chunk c = (Chunk)it.next();
+			GLState.pushMVMatrix();
+			GLState.translate(c.x, 0, c.z);
+			GLState.setNMatrix();
+			shader.setUniform1i("tex", 0);
+			shader.setMatrices(GLState.mvMatrix, GLState.pMatrix, GLState.nMatrix);
 			c.draw();
+
+			GLState.popMVMatrix();
 			
 		}
 		
 	}
 	public void loadAround(int x, int z){
+		ChunkLookup cl = new ChunkLookup(x,z);
+		if (map.containsKey(cl)){
+			return;
+		}
 		fetcher.pushChunkRequest(x, z);
+		Log.d("OO", "Requested " +  Integer.toString(cl.x) + "/" + Integer.toString(cl.z) + " from datafetcher");
+		pending.add(cl);
 	}
 	
 	public void update(){
@@ -103,8 +118,8 @@ public class World {
 	private void checkForPending(){
 		for (int i = 0; i < pending.size(); i++){
 			ChunkLookup cl = pending.get(i);
-			
 			if (fetcher.getChunkStatus(cl.x, cl.z)==TaskStatus.DONE){
+				Log.d("OO", "Loading chunk data" +  Integer.toString(cl.x) + "/" + Integer.toString(cl.z) + "into chunk");
 				float data[] = fetcher.getChunkData(cl.x, cl.z);
 				int num_indices = data.length/8;
 				int indices[] = new int[num_indices];
@@ -113,6 +128,8 @@ public class World {
 				}
 				
 				Chunk c = new Chunk(data, indices, shader.getProgram());
+				c.x = cl.x;
+				c.z = cl.z;
 				map.put(cl, c);
 				
 				pending.remove(i);
