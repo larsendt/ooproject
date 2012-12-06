@@ -25,10 +25,10 @@ class Triangle(object):
     def serial_data(self):
         return [self.v1.x, self.v1.y, self.v1.z,
                 self.normals[0].x, self.normals[0].y, self.normals[0].z,
-                self.v1.x/4.0,self.v1.y/4.0,
+                self.v1.x/0.3,self.v1.z/0.3,
                 self.v2.x, self.v2.y, self.v2.z,
                 self.normals[1].x, self.normals[1].y, self.normals[1].z,
-                self.v2.x/4.0,self.v2.y/4.0,
+                self.v2.x/0.3,self.v2.z/0.3,
                 self.v3.x, self.v3.y, self.v3.z,
                 self.normals[2].x, self.normals[2].y, self.normals[2].z,
-                self.v3.x/4.0,self.v3.y/4.0,]
+                self.v3.x/0.3,self.v3.z/0.3,]

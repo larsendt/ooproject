@@ -22,6 +22,7 @@ class Terrain(object):
             chunk = self.cg.generate_chunk(x, y)
 
             vertex_data = chunk.serial_vertex_data()
+            vertex_data_size = len(vertex_data)
 
             if compression:
                 vertex_data = zlib.compress(vertex_data)
@@ -32,7 +33,8 @@ class Terrain(object):
                                   "chunk_resolution": self.cg.chunk_res(),
                                   "chunk_size": self.cg.chunk_size(), 
                                   "vertex_data":encoded_data,
-                                  "compression":compression})
+                                  "compression":compression,
+                                  "inflated_size":vertex_data_size})
             self.cache[cache_key] = jsonstr
 
             end = time.time()
