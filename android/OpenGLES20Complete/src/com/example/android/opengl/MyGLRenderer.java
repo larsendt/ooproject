@@ -60,16 +60,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private String vertexShaderCode;
     private String fragmentShaderCode;
 
-    private float[] pMatrix = new float[16];
-    private float[] mvMatrix = new float[16];
-    private float[] nMatrix = new float[9];
-    private float[] nInvertMatrix = new float[16];
-    private float[] nInvertTransposeMatrix = new float[16];
-    private float[] tmpMatrix = new float[16];
-
-    private Stack<float[]> projectionStack = new Stack<float[]>();
-    private Stack<float[]> modelviewStack = new Stack<float[]>();
-
     private int texture;
 
     // Declare as volatile because we are updating it from another thread
@@ -184,8 +174,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         m_dataFetcher = new DataFetcher();
         
-        Matrix.setIdentityM(pMatrix, 0);
-        Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
+        Matrix.setIdentityM(GLState.pMatrix, 0);
+        Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
 
         initGL();
         w = new World(m_dataFetcher, shader);
@@ -241,8 +231,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 
         shader.useProgram();
-
         
+        float nlightPos[] = {0.5f,0f,.5f,1};
+        float lightPos[] = new float[4];
+        
+        
+        Matrix.multiplyMV(lightPos, 0, GLState.mvMatrix, 0, nlightPos, 0);
+        
+        shader.setUniform3f("lightPos", lightPos[0],lightPos[1],lightPos[2]);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture);
