@@ -14,10 +14,10 @@ class VertexGenerator(object):
         self.delta = self.conf.get("perlin_normal_delta", 1e-6, True)
         self.p = perlin.SimplexNoise()
 
-    def vert_and_norm(self, x, z):
-        h = self.noise(x, z, self.octaves)
-        hdx = self.noise(x+self.delta, z, self.octaves)
-        hdz = self.noise(x, z+self.delta, self.octaves)
+    def vert_and_norm(self, x, z, xoff, zoff):
+        h = self.noise(x+xoff, z+zoff, self.octaves)
+        hdx = self.noise(x+xoff+self.delta, z+zoff, self.octaves)
+        hdz = self.noise(x+xoff, z+zoff+self.delta, self.octaves)
 
         v1 = vector.Vec3(x, h, z)
         v2 = vector.Vec3(x+self.delta, hdx, z)
@@ -65,7 +65,7 @@ class ChunkGenerator(object):
             for j in range(self.resolution):
                 xval = (x + i) * (float(self.size) / self.resolution)
                 zval = (z + j) * (float(self.size) / self.resolution)
-                vert, norm = self.vx_gen.vert_and_norm(xval, zval)
+                vert, norm = self.vx_gen.vert_and_norm(xval, zval, x, z)
                 varr.append(vert)
                 narr.append(norm)
 
