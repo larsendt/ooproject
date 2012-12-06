@@ -17,14 +17,9 @@
 package com.example.android.opengl;
 
 import android.app.Activity;
-import android.content.Context;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 
 public class OpenGLES20Complete extends Activity {

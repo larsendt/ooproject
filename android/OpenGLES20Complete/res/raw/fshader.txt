@@ -1,3 +1,4 @@
+precision mediump float;
 uniform sampler2D tex;
 varying vec2 f_txcoord;
 varying vec3 f_lightPos;
