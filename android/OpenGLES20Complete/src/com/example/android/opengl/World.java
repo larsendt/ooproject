@@ -101,12 +101,18 @@ public class World {
 	}
 	public void loadAround(int x, int z){
 		ChunkLookup cl = new ChunkLookup(x,z);
-		if (map.containsKey(cl)){
-			return;
+		
+		for (int i = -1; i < 2; i++){
+			for (int j = -1; j < 2; j++){
+				cl = new ChunkLookup(x+i,z+j);
+				if (map.containsKey(cl)){
+					continue;
+				}
+				fetcher.pushChunkRequest(cl.x, cl.z);
+				Log.d("World", "Requested " +  Integer.toString(cl.x) + "/" + Integer.toString(cl.z) + " from datafetcher");
+				pending.add(cl);
+			}
 		}
-		fetcher.pushChunkRequest(x, z);
-		Log.d("OO", "Requested " +  Integer.toString(cl.x) + "/" + Integer.toString(cl.z) + " from datafetcher");
-		pending.add(cl);
 	}
 	
 	public void update(){
@@ -118,8 +124,10 @@ public class World {
 	private void checkForPending(){
 		for (int i = 0; i < pending.size(); i++){
 			ChunkLookup cl = pending.get(i);
-			if (fetcher.getChunkStatus(cl.x, cl.z)==TaskStatus.DONE){
-				Log.d("OO", "Loading chunk data" +  Integer.toString(cl.x) + "/" + Integer.toString(cl.z) + "into chunk");
+			TaskStatus status = fetcher.getChunkStatus(cl.x, cl.z);
+			if (status==TaskStatus.DONE){
+				
+				
 				float data[] = fetcher.getChunkData(cl.x, cl.z);
 				int num_indices = data.length/8;
 				int indices[] = new int[num_indices];
@@ -132,6 +140,12 @@ public class World {
 				c.z = cl.z;
 				map.put(cl, c);
 				
+				pending.remove(i);
+				Log.d("World", "Loaded " +  Integer.toString(c.x) + "/" + Integer.toString(c.z) + " into chunk");
+				Log.d("World", Integer.toString(pending.size()) + " pending left");
+			}
+			else if (status == TaskStatus.NOSUCHCHUNK){
+				Log.d("World", "Looks like the fetcher dropped " + Integer.toString(cl.x) + "/" + Integer.toString(cl.z));
 				pending.remove(i);
 			}
 			
