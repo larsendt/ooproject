@@ -39,7 +39,11 @@ public class GLState {
 	}
 	
 	public static void pushMVMatrix(){
-        modelviewStack.push(mvMatrix);
+		float pushed[] = new float[16];
+		for (int i = 0; i < 16; i++){
+			pushed[i] = mvMatrix[i];
+		}
+        modelviewStack.push(pushed);
     }
 
 	public static void popMVMatrix(){
@@ -51,11 +55,15 @@ public class GLState {
     }
 
 	public static void pushPMatrix(){
-        projectionStack.push(pMatrix);
+		float pushed[] = new float[16];
+		for (int i = 0; i < 16; i++){
+			pushed[i] = pMatrix[i];
+		}
+        projectionStack.push(pushed);
     }
 	
 	public static void popPMatrix(){
-		float popped[] = new float[16];
+		float popped[] = modelviewStack.pop();
 		for (int i = 0; i < 16; i++){
 			mvMatrix[i] = popped[i];
 		}
