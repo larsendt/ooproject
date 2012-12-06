@@ -227,7 +227,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             GLState.translate(0,0,-mY);
             GLState.rotate(mxAngle, 1f, 0, 0);
             GLState.rotate(myAngle, 0,1f,0);
-            GLState.translate(-2f,0,-2f);
+            GLState.translate(-.5f,0,-.5f);
         }
 
         else if (view == 0){
@@ -235,7 +235,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             GLState.rotate(mxAngle, 1f, 0, 0);
             GLState.rotate(myAngle, 0,1f,0);
-            GLState.translate(-2f,-mY,-2f);
+            GLState.translate(-.5f,-mY,-.5f);
             
         }
 
