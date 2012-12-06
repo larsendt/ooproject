@@ -57,6 +57,7 @@ class ChunkGenerator(object):
         return self.size, self.resolution, self.vx_gen.octaves, self.vx_gen.height, self.vx_gen.delta
 
     def generate_chunk(self, x, z):
+        print "XZ", x, z
         vertices = []
         normals = []
         for i in range(self.resolution):
@@ -65,7 +66,8 @@ class ChunkGenerator(object):
             for j in range(self.resolution):
                 xval = (x + i) * (float(self.size) / self.resolution)
                 zval = (z + j) * (float(self.size) / self.resolution)
-                vert, norm = self.vx_gen.vert_and_norm(xval, zval)
+                print xval, zval
+                vert, norm = self.vx_gen.vert_and_norm(x + xval, z + zval)
                 varr.append(vert)
                 narr.append(norm)
 
