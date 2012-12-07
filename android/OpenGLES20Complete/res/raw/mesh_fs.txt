@@ -16,7 +16,7 @@ void main()
     vec3 specular = vec3(.4)*pow(max(dot(R,E),0.0), 15.0);
     specular = clamp(specular, 0.0,1.0);
 
-    vec4 color = texture2D(tex, f_txcoord*.1);
+    vec4 color = texture2D(tex, f_txcoord);
     vec3 intensity = vec3(color) * diffuse;
     gl_FragColor = vec4(ambient+intensity+specular, 1.0);
 }
