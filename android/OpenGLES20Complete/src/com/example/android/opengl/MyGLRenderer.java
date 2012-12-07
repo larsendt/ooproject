@@ -53,20 +53,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public static final String TAG = "OO";
     private Shader meshShader;
-    private Shader plainShader;
-    private VBO lightball;
-    private boolean m_hasChunk = false;
+    private Light lightball;
     private DataFetcher m_dataFetcher;
     private Camera m_camera;
 
-    private String vertexShaderCode;
-    private String fragmentShaderCode;
-
     private int texture;
 
-    // Declare as volatile because we are updating it from another thread
-    private float m_xangle;
-    private float m_yangle;
     private float m_xpos;
     private float m_zpos;
     private float m_y = 2.0f;
@@ -81,7 +73,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Context mContext;
 
     public void setContext(Context context){
-
         mContext = context;
     }
 
@@ -102,8 +93,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             m_camera.move(dx, dy);
         }
         else {
-            m_xangle += dy;
-            m_yangle += dx;
             m_camera.rotate(dx, dy);
         }
     }
@@ -135,7 +124,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         try {
             myBitmap = BitmapFactory.decodeStream( mContext.getResources().getAssets().open("rock.bmp"));
             if (myBitmap == null){
-                Log.d(TAG, "ASDF");
+                Log.d(TAG, "Bitmap wut");
             }
         } catch (IOException e) {
             // farts
@@ -157,11 +146,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         view = 1;
 
-        plainShader = loadShader(R.raw.plain_vs, R.raw.plain_fs);
-        meshShader = loadShader(R.raw.mesh_vs, R.raw.mesh_fs);
+        meshShader = Shader.loadShaderFromResource(R.raw.mesh_vs, R.raw.mesh_fs, mContext);
 
-        lightball = new VBO(plainShader.getProgram());
-        
+        lightball = new Light(mContext);
+
         m_dataFetcher = new DataFetcher();
 
         m_camera = new Camera();
@@ -171,52 +159,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
 
         initGL();
-        
-        float vertices[] = {
-        		-.1f,.1f,-.1f,
-        		-.1f,.1f,.1f,
-        		.1f,.1f,.1f,
-        		.1f,.1f,-.1f,
-        		
-        		-.1f,-.1f,-.1f,
-        		-.1f,-.1f,.1f,
-        		.1f,-.1f,.1f,
-        		.1f,-.1f,-.1f
-        };
-        
-        int indices[] = {
-        		//top
-        		
-        		0,1,2,
-        		0,3,2,
-        		
-        		//bottom
-        		
-        		4,5,6,
-        		4,7,6,
-        		
-        		//left
-        		
-        		0,4,1,
-        		1,5,4,
-        		
-        		//right
-        		
-        		2,6,3,
-        		3,7,6,
-        		
-        		//front
-        		
-        		1,5,2,
-        		2,6,5
-        		
-        		//back
-        		
-        		
-        };
-        
-        lightball.setBuffers(vertices, indices);
-        
+
         w = new World(m_dataFetcher, meshShader);
         w.loadAround(0, 0);
         
@@ -229,32 +172,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        m_camera.update();
         m_camera.doTransformation();
-
-        pos +=.01;
-
-        float nlightPos[] = {(float)Math.sin(pos)*3.0f  + .5f,(float)Math.cos(pos)*.5f,.5f,1};
-        
-        GLState.pushMVMatrix();
-        
-        GLState.translate(nlightPos[0], nlightPos[1], nlightPos[2]);
-        GLState.scale(.1f, .1f, .1f);
-        plainShader.useProgram();
-        plainShader.setMatrices(GLState.mvMatrix, GLState.pMatrix);
+        lightball.update();
         lightball.draw();
-        
-        GLState.popMVMatrix();
-        
-        
         meshShader.useProgram();
-        
-        
-        float lightPos[] = new float[4];
-        
-        Matrix.multiplyMV(lightPos, 0, GLState.mvMatrix, 0, nlightPos, 0);
-        
-        meshShader.setUniform3f("lightPos", lightPos[0],lightPos[1],lightPos[2]);
+
+        float[] lightPos = lightball.getMVPos();
+        meshShader.setUniform3f("lightPos", lightPos[0], lightPos[1], lightPos[2]);
         
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture);
@@ -270,44 +194,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.setIdentityM(GLState.pMatrix, 0);
         Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, ratio, .1f,100.0f);
     }
-
-    private Shader loadShader(int vxresource, int fsresource){
-    	try {
-            Resources res = mContext.getResources();
-            InputStream in = res.openRawResource(vxresource);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] tmpbuf = new byte[8192];
-            int bytesRead;
-
-            while((bytesRead = in.read(tmpbuf)) != -1) {
-                out.write(tmpbuf, 0, bytesRead);
-            }
-
-            vertexShaderCode = out.toString("US-ASCII");
-            Log.d(MyGLRenderer.TAG, vertexShaderCode);
-
-            in = res.openRawResource(fsresource);
-            out = new ByteArrayOutputStream();
-
-            Log.d(MyGLRenderer.TAG, "================");
-
-            while((bytesRead = in.read(tmpbuf)) != -1) {
-                out.write(tmpbuf, 0, bytesRead);
-            }
-
-            fragmentShaderCode = out.toString("US-ASCII");
-            Log.d(MyGLRenderer.TAG, fragmentShaderCode);
-
-
-        } catch(Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to load shaders");
-        }
-    	
-    	return new Shader(vertexShaderCode, fragmentShaderCode);
-    	
-    }
-
 
     /**
      * Utility method for debugging OpenGL calls. Provide the name of the call

@@ -45,8 +45,10 @@ public class Camera {
     }
 
     public void rotate(float dx, float dy) {
-        m_xRotation += dy * 100.0f;
-        m_yRotation += dx * 100.0f;
+        m_xRotation += dy * 50.0f;
+        m_yRotation += dx * 50.0f;
+
+        m_xRotation = clamp(m_xRotation, -90, 90);
     }
 
     public void update() {
