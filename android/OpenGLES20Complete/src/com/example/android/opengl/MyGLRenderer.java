@@ -86,19 +86,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public void moveUp() {
-        m_y += 0.1;
+        m_y += 0.3;
         m_camera.setHeight(m_y);
     }
 
     public void moveDown() {
-        m_y -= 0.1;
+        m_y -= 0.3;
         m_camera.setHeight(m_y);
     }
 
     public void drag(float dx, float dy) {
-        m_xpos += dx;
-        m_zpos += dy;
-        m_camera.move(dx, dy);
+        if(view == 1) {
+            m_xpos += dx;
+            m_zpos += dy;
+            m_camera.move(dx, dy);
+        }
+        else {
+            m_xangle += dy;
+            m_yangle += dx;
+            m_camera.rotate(dx, dy);
+        }
     }
 
     public void nextView() {
@@ -222,6 +229,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
+        m_camera.update();
         m_camera.doTransformation();
 
         pos +=.01;
