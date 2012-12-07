@@ -71,6 +71,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public volatile int view;
     
     private World w;
+    
+    float pos;
 
 
     private Context mContext;
@@ -198,6 +200,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         
         w = new World(m_dataFetcher, meshShader);
         w.loadAround(0, 0);
+        
+        pos = 0;
     }
 
     public void onDrawFrame(GL10 unused) {
@@ -246,8 +250,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             GLState.translate(-.5f,-mY,-.5f);
             
         }
+        
+        pos +=.01;
 
-        float nlightPos[] = {0.5f,0f,.5f,1};
+        float nlightPos[] = {(float)Math.sin(pos)*3.0f  + .5f,(float)Math.cos(pos)*.5f,.5f,1};
         
         GLState.pushMVMatrix();
         
