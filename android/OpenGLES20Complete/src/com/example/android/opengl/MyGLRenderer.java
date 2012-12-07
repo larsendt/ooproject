@@ -56,7 +56,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Shader plainShader;
     private VBO lightball;
     private boolean m_hasChunk = false;
-    DataFetcher m_dataFetcher;
+    private DataFetcher m_dataFetcher;
+    private Camera m_camera;
 
     private String vertexShaderCode;
     private String fragmentShaderCode;
@@ -64,9 +65,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int texture;
 
     // Declare as volatile because we are updating it from another thread
-    public volatile float mxAngle;
-    public volatile float myAngle;
-    public volatile float mY = 1;
+    private float m_xangle;
+    private float m_yangle;
+    private float m_xpos;
+    private float m_zpos;
+    private float m_y = 2.0f;
 
     public volatile int view;
     
@@ -82,6 +85,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mContext = context;
     }
 
+    public void moveUp() {
+        m_y += 0.1;
+        m_camera.setHeight(m_y);
+    }
+
+    public void moveDown() {
+        m_y -= 0.1;
+        m_camera.setHeight(m_y);
+    }
+
+    public void drag(float x, float y) {
+        m_xpos += x;
+        m_zpos += y;
+        m_camera.setPos(m_xpos/400.0f, m_zpos/400.0f);
+    }
+
+    public void nextView() {
+        view = (view+1) % 2;
+    }
+
     public void initGL(){
     	
     	GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -92,7 +115,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         checkGlError("gen texture");
 
-        
         texture = ib.get();
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
@@ -147,6 +169,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         //m_dataFetcher.execute("http://larsendt.com:1234/?x=0&z=0&compression=yes");
         
         m_dataFetcher = new DataFetcher();
+
+        m_camera = new Camera();
+        m_camera.setHeight(m_y);
         
         Matrix.setIdentityM(GLState.pMatrix, 0);
         Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
@@ -205,52 +230,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public void onDrawFrame(GL10 unused) {
-
-        /*if(m_dataFetcher.getChunkStatus(0,0) == TaskStatus.DONE && !m_hasChunk ) {
-
-            int SIZE_OF_VERTEX_PACKAGE = 8;
-            float[] vertex_data = m_dataFetcher.getChunkData(0,0);
-
-            int num_indices = vertex_data.length / SIZE_OF_VERTEX_PACKAGE;
-            int[] index_data = new int[num_indices];
-
-            for(int i = 0; i < index_data.length; i++) {
-                index_data[i] = i;
-            }
-
-            vbo.setBuffers(vertex_data, index_data);
-            MyGLRenderer.checkGlError("vbo setBuffers");
-            m_hasChunk = true;
-            Log.d(MyGLRenderer.TAG, "Vertex buffer complete");
-        }*/
-
     	w.update();
     	
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        GLState.setMVIdentity();
+        m_camera.doTransformation();
 
-        GLState.pushMVMatrix();
-
-
-        if (view == 1){
-
-            GLState.translate(0,0,-mY);
-            GLState.rotate(mxAngle, 1f, 0, 0);
-            GLState.rotate(myAngle, 0,1f,0);
-            GLState.translate(-.5f,0,-.5f);
-        }
-
-        else if (view == 0){
-
-
-            GLState.rotate(mxAngle, 1f, 0, 0);
-            GLState.rotate(myAngle, 0,1f,0);
-            GLState.translate(-.5f,-mY,-.5f);
-            
-        }
-        
         pos +=.01;
 
         float nlightPos[] = {(float)Math.sin(pos)*3.0f  + .5f,(float)Math.cos(pos)*.5f,.5f,1};
