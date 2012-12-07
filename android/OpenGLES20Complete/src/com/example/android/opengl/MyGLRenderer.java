@@ -95,10 +95,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         m_camera.setHeight(m_y);
     }
 
-    public void drag(float x, float y) {
-        m_xpos += x;
-        m_zpos += y;
-        m_camera.setPos(m_xpos/400.0f, m_zpos/400.0f);
+    public void drag(float dx, float dy) {
+        m_xpos += dx;
+        m_zpos += dy;
+        m_camera.move(dx, dy);
     }
 
     public void nextView() {
@@ -144,29 +144,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, myBitmap, 0);
 
         checkGlError("TexImage");
-        
-    	
+
     }
     
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-
-        // Set the background frame color
-
-        Log.d(TAG, "==============\nStarting glstuff");
-
         view = 1;
 
-        
-
         plainShader = loadShader(R.raw.plain_vs, R.raw.plain_fs);
-
         meshShader = loadShader(R.raw.mesh_vs, R.raw.mesh_fs);
-        
 
         lightball = new VBO(plainShader.getProgram());
-
-        //m_dataFetcher = new AsyncDataFetcher();
-        //m_dataFetcher.execute("http://larsendt.com:1234/?x=0&z=0&compression=yes");
         
         m_dataFetcher = new DataFetcher();
 

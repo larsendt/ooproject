@@ -5,7 +5,7 @@ import android.util.Log;
 public class Camera {
     private float m_height;
     private float m_x;
-    private float m_z;
+    private float m_y;
 
 	public Camera() {
 		m_height = 1.0f;
@@ -15,7 +15,7 @@ public class Camera {
         GLState.setMVIdentity();
         GLState.pushMVMatrix();
         GLState.translate(0.0f, 0.0f, -m_height);
-        GLState.translate(m_x, -m_z, 0.0f);
+        GLState.translate(m_x, -m_y, 0.0f);
         GLState.rotate(75, 1.0f, 0.0f, 0.0f);
     }
 
@@ -23,9 +23,8 @@ public class Camera {
         m_height = height;
     }
 
-    public void setPos(float x, float z) {
-        m_x = x;
-        m_z = z;
-        Log.d(MyGLRenderer.TAG, "x:" + m_x + " z:" + m_z);
+    public void move(float dx, float dy) {
+        m_x += dx * Math.abs(m_height * 0.5);
+        m_y += dy * Math.abs(m_height * 0.5);
     }
 }
