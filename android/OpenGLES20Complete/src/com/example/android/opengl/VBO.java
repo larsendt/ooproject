@@ -22,7 +22,6 @@ public class VBO {
     
     public VBO(int shaderprogram)
     {
-    	MyGLRenderer.checkGlError("VBO start");
     	program = shaderprogram;
     	
     	String attribute_name = "vertex";
@@ -30,13 +29,8 @@ public class VBO {
     	att_vertex = GLES20.glGetAttribLocation(program, attribute_name);
     	if (att_vertex == -1){
     	}
-    	MyGLRenderer.checkGlError("vertex glGetAttribLocation");
 
-        MyGLRenderer.checkGlError("normal glGetAttribLocation");
-
-        MyGLRenderer.checkGlError("txcoord glGetAttribLocation");
-        
-        IntBuffer ib = IntBuffer.allocate(2);
+    	IntBuffer ib = IntBuffer.allocate(2);
     	GLES20.glGenBuffers(2, ib);
     	vbo_vertices = ib.get();
     	
@@ -97,10 +91,8 @@ public class VBO {
     
     public void draw()
     {
-    	MyGLRenderer.checkGlError("draw start");
     	
     	GLES20.glEnableVertexAttribArray(att_vertex);
-
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
@@ -120,8 +112,6 @@ public class VBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
     	MyGLRenderer.checkGlError("glBindBuffer");
-    	
-    	
     	
     	GLES20.glDrawElements(
     			GLES20.GL_TRIANGLES,

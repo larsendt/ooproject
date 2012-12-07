@@ -52,8 +52,9 @@ import android.util.Log;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public static final String TAG = "OO";
-    private Shader shader;
-    private VBO vbo;
+    private Shader meshShader;
+    private Shader plainShader;
+    private VBO lightball;
     private boolean m_hasChunk = false;
     DataFetcher m_dataFetcher;
 
@@ -133,41 +134,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         
 
-        try {
-            Resources res = mContext.getResources();
-            InputStream in = res.openRawResource(R.raw.vshader);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] tmpbuf = new byte[8192];
-            int bytesRead;
+        plainShader = loadShader(R.raw.plain_vs, R.raw.plain_fs);
 
-            while((bytesRead = in.read(tmpbuf)) != -1) {
-                out.write(tmpbuf, 0, bytesRead);
-            }
+        meshShader = loadShader(R.raw.mesh_vs, R.raw.mesh_fs);
+        
 
-            vertexShaderCode = out.toString("US-ASCII");
-            Log.d(MyGLRenderer.TAG, vertexShaderCode);
-
-            in = res.openRawResource(R.raw.fshader);
-            out = new ByteArrayOutputStream();
-
-            Log.d(MyGLRenderer.TAG, "================");
-
-            while((bytesRead = in.read(tmpbuf)) != -1) {
-                out.write(tmpbuf, 0, bytesRead);
-            }
-
-            fragmentShaderCode = out.toString("US-ASCII");
-            //Log.d(MyGLRenderer.TAG, fragmentShaderCode);
-
-
-        } catch(Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to load shaders");
-        }
-
-        shader = new Shader(vertexShaderCode, fragmentShaderCode);
-
-        vbo = new VBO(shader.getProgram());
+        lightball = new VBO(plainShader.getProgram());
 
         //m_dataFetcher = new AsyncDataFetcher();
         //m_dataFetcher.execute("http://larsendt.com:1234/?x=0&z=0&compression=yes");
@@ -178,7 +150,53 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
 
         initGL();
-        w = new World(m_dataFetcher, shader);
+        
+        float vertices[] = {
+        		-.1f,.1f,-.1f,
+        		-.1f,.1f,.1f,
+        		.1f,.1f,.1f,
+        		.1f,.1f,-.1f,
+        		
+        		-.1f,-.1f,-.1f,
+        		-.1f,-.1f,.1f,
+        		.1f,-.1f,.1f,
+        		.1f,-.1f,-.1f
+        };
+        
+        int indices[] = {
+        		//top
+        		
+        		0,1,2,
+        		0,3,2,
+        		
+        		//bottom
+        		
+        		4,5,6,
+        		4,7,6,
+        		
+        		//left
+        		
+        		0,4,1,
+        		1,5,4,
+        		
+        		//right
+        		
+        		2,6,3,
+        		3,7,6,
+        		
+        		//front
+        		
+        		1,5,2,
+        		2,6,5
+        		
+        		//back
+        		
+        		
+        };
+        
+        lightball.setBuffers(vertices, indices);
+        
+        w = new World(m_dataFetcher, meshShader);
         w.loadAround(0, 0);
     }
 
@@ -229,25 +247,30 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             
         }
 
-
-        shader.useProgram();
-        
         float nlightPos[] = {0.5f,0f,.5f,1};
-        float lightPos[] = new float[4];
         
+        GLState.pushMVMatrix();
+        
+        GLState.translate(nlightPos[0], nlightPos[1], nlightPos[2]);
+        GLState.scale(.1f, .1f, .1f);
+        plainShader.useProgram();
+        plainShader.setMatrices(GLState.mvMatrix, GLState.pMatrix);
+        lightball.draw();
+        
+        GLState.popMVMatrix();
+        
+        
+        meshShader.useProgram();
+        
+        
+        float lightPos[] = new float[4];
         
         Matrix.multiplyMV(lightPos, 0, GLState.mvMatrix, 0, nlightPos, 0);
         
-        shader.setUniform3f("lightPos", lightPos[0],lightPos[1],lightPos[2]);
-
+        meshShader.setUniform3f("lightPos", lightPos[0],lightPos[1],lightPos[2]);
+        
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture);
-
-        checkGlError("bind texture");
-
-
-        checkGlError("active texture");
-
         
         w.draw();
 
@@ -261,6 +284,42 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, ratio, .1f,100.0f);
     }
 
+    private Shader loadShader(int vxresource, int fsresource){
+    	try {
+            Resources res = mContext.getResources();
+            InputStream in = res.openRawResource(vxresource);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] tmpbuf = new byte[8192];
+            int bytesRead;
+
+            while((bytesRead = in.read(tmpbuf)) != -1) {
+                out.write(tmpbuf, 0, bytesRead);
+            }
+
+            vertexShaderCode = out.toString("US-ASCII");
+            Log.d(MyGLRenderer.TAG, vertexShaderCode);
+
+            in = res.openRawResource(fsresource);
+            out = new ByteArrayOutputStream();
+
+            Log.d(MyGLRenderer.TAG, "================");
+
+            while((bytesRead = in.read(tmpbuf)) != -1) {
+                out.write(tmpbuf, 0, bytesRead);
+            }
+
+            fragmentShaderCode = out.toString("US-ASCII");
+            Log.d(MyGLRenderer.TAG, fragmentShaderCode);
+
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load shaders");
+        }
+    	
+    	return new Shader(vertexShaderCode, fragmentShaderCode);
+    	
+    }
 
 
     /**

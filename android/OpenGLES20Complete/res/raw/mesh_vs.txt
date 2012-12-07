@@ -14,7 +14,6 @@ varying vec3 f_vertex;
 
 void main() 
 {
-    gl_PointSize = 3.0;
     f_txcoord = txcoord;
     f_normal = normalize(nMatrix * normal);
     f_vertex = vec3(mvMatrix * vec4(vertex, 1.0));
