@@ -21,40 +21,13 @@ public class Light {
         m_mvPos = new float[4];
 
         m_shader = Shader.loadShaderFromResource(R.raw.plain_vs, R.raw.plain_fs, context);
-        m_vbo = new VBO(m_shader.getProgram());
-
-        float vertices[] = {
-                -.1f,.1f,-.1f,
-                -.1f,.1f,.1f,
-                .1f,.1f,.1f,
-                .1f,.1f,-.1f,
-
-                -.1f,-.1f,-.1f,
-                -.1f,-.1f,.1f,
-                .1f,-.1f,.1f,
-                .1f,-.1f,-.1f
-        };
-
-        int indices[] = {
-                0,1,2,
-                0,3,2,
-                4,5,6,
-                4,7,6,
-                0,4,1,
-                1,5,4,
-                2,6,3,
-                3,7,6,
-                1,5,2,
-                2,6,5
-        };
-
-        m_vbo.setBuffers(vertices, indices);
+        m_vbo = ShapeUtils.cube(m_shader.getProgram());
     }
 
     public void draw() {
         GLState.pushMVMatrix();
         GLState.translate(m_pos[0], m_pos[1], m_pos[2]);
-        GLState.scale(.1f, .1f, .1f);
+        GLState.scale(.01f, .01f, .01f);
         Matrix.multiplyMV(m_mvPos, 0, GLState.mvMatrix, 0, m_pos, 0);
         m_shader.useProgram();
         m_shader.setMatrices(GLState.mvMatrix, GLState.pMatrix);

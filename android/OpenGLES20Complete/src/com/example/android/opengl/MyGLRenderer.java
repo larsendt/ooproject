@@ -57,7 +57,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private DataFetcher m_dataFetcher;
     private Camera m_camera;
 
-    private int texture;
+    private int texture1;
+    private int texture2;
 
     private float m_xpos;
     private float m_zpos;
@@ -105,48 +106,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     	
     	GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        IntBuffer ib = IntBuffer.allocate(1);
-        GLES20.glGenTextures(1, ib);
+        
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-        checkGlError("gen texture");
-
-        texture = ib.get();
-
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
-
-        checkGlError("bind texture");
-
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-
-        Bitmap myBitmap;
-        try {
-            myBitmap = BitmapFactory.decodeStream( mContext.getResources().getAssets().open("rock.bmp"));
-            if (myBitmap == null){
-                Log.d(TAG, "Bitmap wut");
-            }
-        } catch (IOException e) {
-            // farts
-            e.printStackTrace();
-            myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
-
-            myBitmap.setPixel(0, 0, Color.WHITE);
-            myBitmap.setPixel(0, 1, Color.CYAN);
-            myBitmap.setPixel(1, 0, Color.CYAN);
-            myBitmap.setPixel(1, 1, Color.WHITE);
-        }
-        
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, myBitmap, 0);
-
-        checkGlError("TexImage");
-
+        texture1 = loadBitmap("rock.bmp");
+        texture2 = loadBitmap("grass.bmp");
     }
     
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         view = 1;
 
-        meshShader = Shader.loadShaderFromResource(R.raw.mesh_vs, R.raw.mesh_fs, mContext);
+        meshShader = Shader.loadShaderFromResource(R.raw.terrain_vs, R.raw.terrain_fs, mContext);
 
         lightball = new Light(mContext);
 
@@ -167,6 +137,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public void onDrawFrame(GL10 unused) {
+    	
+    	//w.loadAround((int)Math.floor(m_camera.m_x), (int)Math.floor(m_camera.m_y));
     	w.update();
     	
         // Draw background color
@@ -180,8 +152,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float[] lightPos = lightball.getMVPos();
         meshShader.setUniform3f("lightPos", lightPos[0], lightPos[1], lightPos[2]);
         
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture1);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture2);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        
+        meshShader.setUniform1i("tex1", 0);
+        meshShader.setUniform1i("tex2", 1);
         
         w.draw();
 
@@ -195,6 +172,45 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, ratio, .1f,100.0f);
     }
 
+    public int loadBitmap(String resourceName){
+    	IntBuffer ib = IntBuffer.allocate(1);
+        GLES20.glGenTextures(1, ib);
+        
+        checkGlError("gen texture");
+
+        int textureHandle = ib.get();
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle);
+
+        checkGlError("bind texture");
+
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+
+        Bitmap myBitmap;
+        try {
+            myBitmap = BitmapFactory.decodeStream( mContext.getResources().getAssets().open(resourceName));
+            if (myBitmap == null){
+                Log.d(TAG, "Bitmap wut");
+            }
+        } catch (IOException e) {
+            // farts
+            e.printStackTrace();
+            myBitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
+
+            myBitmap.setPixel(0, 0, Color.WHITE);
+            myBitmap.setPixel(0, 1, Color.CYAN);
+            myBitmap.setPixel(1, 0, Color.CYAN);
+            myBitmap.setPixel(1, 1, Color.WHITE);
+        }
+        
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, myBitmap, 0);
+
+        checkGlError("TexImage");
+        
+        return textureHandle;
+    }
+    
     /**
      * Utility method for debugging OpenGL calls. Provide the name of the call
      * just after making it:

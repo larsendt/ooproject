@@ -4,8 +4,8 @@ import android.util.Log;
 
 public class Camera {
     private float m_height;
-    private float m_x;
-    private float m_y;
+    public float m_x;
+    public float m_y;
     private float m_xRotation;
     private float m_yRotation;
     private float m_xMomentum;

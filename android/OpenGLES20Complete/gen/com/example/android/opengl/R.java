@@ -28,6 +28,8 @@ public final class R {
         public static final int mesh_vs=0x7f040001;
         public static final int plain_fs=0x7f040002;
         public static final int plain_vs=0x7f040003;
+        public static final int terrain_fs=0x7f040004;
+        public static final int terrain_vs=0x7f040005;
     }
     public static final class string {
         public static final int app_name=0x7f050001;
