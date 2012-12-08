@@ -17,6 +17,7 @@
 package com.example.android.opengl;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +41,10 @@ public class OpenGLES20Complete extends Activity {
         if (mGLView == null){
         	Log.d("OO", "Surface grabbed from the layout was null");
         }
+        
+        Intent intent = getIntent();
+        String serverName = intent.getStringExtra("com.example.android.opengl.serverName");
+        Log.d("OO", serverName);
         //addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
     

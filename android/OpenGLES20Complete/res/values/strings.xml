@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!--
+     Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -21,5 +22,11 @@
     <string name="move_up">Up</string>
     <string name="move_down">Down</string>
     <string name="textbox">"HELLO</string>
+    <string name="hello_world">Hello! click the button above to get started.</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_init">InitActivity</string>
+    <string name="start">Start Streaming</string>
+    <string name="serverHint">Enter Server IP or Name</string>
+    <string name="daneServer">http://larsendt.com:1234</string>
 
 </resources>
