@@ -24,7 +24,7 @@ def get_chunk_data(x, y, host, port):
 
         start = time.time()
        
-        f = urllib2.urlopen("http://%s:%d/?x=%d&y=%d&compression=yes" % (host, port, x, y))
+        f = urllib2.urlopen("http://%s:%d/?x=%d&z=%d&compression=yes" % (host, port, x, y))
         data = f.read()
         f.close()
 
