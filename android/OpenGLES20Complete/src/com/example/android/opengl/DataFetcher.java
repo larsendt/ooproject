@@ -1,6 +1,7 @@
 package com.example.android.opengl;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.util.Pair;
 
 import java.util.HashMap;
@@ -14,13 +15,16 @@ import java.util.Map;
 
 public class DataFetcher {
     private Map<Pair<Integer, Integer>, AsyncDataFetcher> m_fetcherMap;
-    private final String m_url = "http://larsendt.com:1234/?x=%d&z=%d&compression=yes";
-
+    private String m_url;
+    private final String chunkRequest = "/?x=%d&z=%d&compression=yes";
+    
     public enum TaskStatus {
         NOSUCHCHUNK,
         PROCESSING,
         DONE,
     }
+    
+    
 
     public DataFetcher() {
         m_fetcherMap = new HashMap<Pair<Integer, Integer>, AsyncDataFetcher>();
@@ -31,7 +35,7 @@ public class DataFetcher {
         if(!m_fetcherMap.containsKey(key)) {
             AsyncDataFetcher df = new AsyncDataFetcher();
             m_fetcherMap.put(key, df);
-            df.execute(String.format(m_url, x, z));
+            df.execute(String.format(m_url + chunkRequest, x, z));
         }
     }
 
@@ -68,5 +72,9 @@ public class DataFetcher {
         }
 
         return data;
+    }
+    
+    public void setServerName(String newUrl){
+    	m_url = newUrl;
     }
 }

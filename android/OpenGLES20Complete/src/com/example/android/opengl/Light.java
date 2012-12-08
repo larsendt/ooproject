@@ -13,9 +13,9 @@ public class Light {
 
     public Light(Context context) {
         m_pos = new float[4];
-        m_pos[0] = 0.0f;
-        m_pos[1] = 1.0f;
-        m_pos[2] = 0.5f;
+        m_pos[0] = 100000.0f;
+        m_pos[1] = 100000.0f;
+        m_pos[2] = 0.0f;
         m_pos[3] = 1.0f;
 
         m_mvPos = new float[4];
@@ -45,7 +45,7 @@ public class Light {
 
     public void update() {
         m_time += 0.01;
-        m_pos[0] = (float)Math.sin(m_time)*3.0f;
-        m_pos[1] = (float)Math.cos(m_time)*3.0f;
+        m_pos[0] = 100000.0f * (float)Math.sin(m_time);
+        m_pos[1] += (float)Math.cos(m_time)*3.0f;
     }
 }

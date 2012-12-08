@@ -52,6 +52,8 @@ import android.util.Log;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public static final String TAG = "OO";
+    
+    
     private Shader meshShader;
     private Light lightball;
     private DataFetcher m_dataFetcher;
@@ -120,7 +122,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         lightball = new Light(mContext);
 
-        m_dataFetcher = new DataFetcher();
+        m_dataFetcher = OpenGLES20Complete.m_dataFetcher;
 
         m_camera = new Camera();
         m_camera.setHeight(m_y);
