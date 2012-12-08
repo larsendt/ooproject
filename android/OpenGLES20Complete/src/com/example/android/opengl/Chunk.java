@@ -16,4 +16,9 @@ public class Chunk {
 		
 		drawable.draw();
 	}
+	
+	public void clear(){
+		drawable.clearBuffers();
+		
+	}
 }

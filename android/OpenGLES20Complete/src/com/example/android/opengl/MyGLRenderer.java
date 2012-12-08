@@ -138,7 +138,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public void onDrawFrame(GL10 unused) {
     	
-    	//w.loadAround((int)Math.floor(m_camera.m_x), (int)Math.floor(m_camera.m_y));
+    	w.loadAround((int)Math.floor(m_camera.m_x), (int)Math.floor(m_camera.m_y));
     	w.update();
     	
         // Draw background color

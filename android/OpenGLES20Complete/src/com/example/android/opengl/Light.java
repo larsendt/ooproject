@@ -46,6 +46,6 @@ public class Light {
     public void update() {
         m_time += 0.01;
         m_pos[0] = (float)Math.sin(m_time)*3.0f;
-        m_pos[1] = (float)Math.cos(m_time)*0.5f;
+        m_pos[1] = (float)Math.cos(m_time)*3.0f;
     }
 }

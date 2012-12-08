@@ -44,7 +44,7 @@ class MyGLSurfaceView extends GLSurfaceView {
             case MotionEvent.ACTION_MOVE:
                 float dx = x - mPreviousX;
                 float dy = y - mPreviousY;
-                mRenderer.drag(dx*TOUCH_SCALE_FACTOR, dy*TOUCH_SCALE_FACTOR);
+                mRenderer.drag(-dx*TOUCH_SCALE_FACTOR, -dy*TOUCH_SCALE_FACTOR);
         }
 
         mPreviousX = x;

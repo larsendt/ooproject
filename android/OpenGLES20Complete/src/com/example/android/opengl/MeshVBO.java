@@ -106,6 +106,11 @@ public class MeshVBO {
     	
     }
     
+    public void clearBuffers(){
+    	int buffers[] = { ibo_elements, vbo_vertices};
+    	GLES20.glDeleteBuffers(2, buffers, 0);
+    }
+    
     public void draw()
     {
     	MyGLRenderer.checkGlError("draw start");

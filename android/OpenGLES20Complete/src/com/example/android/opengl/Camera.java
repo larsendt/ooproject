@@ -16,7 +16,7 @@ public class Camera {
 		m_height = 1.0f;
         m_xMomentum = 0.0f;
         m_yMomentum = 0.0f;
-        m_xRotation = -75;
+        m_xRotation = -90;
         m_yRotation = 0;
 	}
 
@@ -25,7 +25,7 @@ public class Camera {
         GLState.pushMVMatrix();
         GLState.rotate(-m_xRotation, 1.0f, 0.0f, 0.0f);
         GLState.rotate(-m_yRotation, 0.0f, 1.0f, 0.0f);
-        GLState.translate(m_x, -m_height, m_y);
+        GLState.translate(-m_x, -m_height, -m_y);
     }
 
     public void setHeight(float height) {
