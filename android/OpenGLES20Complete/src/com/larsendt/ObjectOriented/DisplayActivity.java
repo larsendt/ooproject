@@ -50,7 +50,8 @@ public class DisplayActivity extends Activity {
         
         
         Intent intent = getIntent();
-        String serverName = intent.getStringExtra("com.example.android.opengl.serverName");
+        String serverName = intent.getStringExtra("com.larsendt.ObjectOriented.serverName");
+        String terrainType = intent.getStringExtra("com.larsendt.ObjectOriented.terrainType");
         Log.d("OO", serverName);
 
         TextView t = (TextView) findViewById(R.id.textView1);
@@ -60,6 +61,7 @@ public class DisplayActivity extends Activity {
         t.setText(str.toCharArray(), 0, str.length());
         
         m_dataFetcher.setServerName(serverName);
+        m_dataFetcher.setTerrainType(terrainType);
         //addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
     

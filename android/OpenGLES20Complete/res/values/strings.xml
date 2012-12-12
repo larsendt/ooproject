@@ -28,5 +28,10 @@
     <string name="start">Start Streaming</string>
     <string name="serverHint">Enter Server IP or Name</string>
     <string name="daneServer">http://larsendt.com:1234</string>
+    <string name="Server">server_help</string>
+    <string name="server_help">SERVER</string>
+    <string name="terrain_help">TERRAIN TYPE</string>
+    <string name="terrain_hint">Type</string>
+    <string name="terrain_default">mountains</string>
 
 </resources>

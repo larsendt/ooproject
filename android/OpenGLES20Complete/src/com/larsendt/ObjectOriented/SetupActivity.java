@@ -27,7 +27,12 @@ public class SetupActivity extends Activity {
     	Intent intent = new Intent(this, DisplayActivity.class);
     	EditText editText = (EditText) findViewById(R.id.editText1);
     	String message = editText.getText().toString();//"http://larsendt.com:1234";
-    	intent.putExtra("com.example.android.opengl.serverName", message);
+    	intent.putExtra("com.larsendt.ObjectOriented.serverName", message);
+    	
+    	editText = (EditText) findViewById(R.id.editText2);
+    	String message2 = editText.getText().toString();
+    	intent.putExtra("com.larsendt.ObjectOriented.terrainType",message2);
+    	
     	startActivity(intent);
     }
 }
