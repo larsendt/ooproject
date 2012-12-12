@@ -37,6 +37,7 @@
         <item>mountains</item>
         <item>plains</item>
         <item>oceans</item>
+        <item>desert</item>
     </string-array>
 
 </resources>
