@@ -10,72 +10,24 @@ import java.util.Queue;
 import java.util.Vector;
 
 import android.util.Log;
+import android.util.Pair;
 
 import com.example.android.opengl.DataFetcher.TaskStatus;
 
 public class World {
 
-	private final String vertexShaderCode =
-	        // This matrix member variable provides a hook to manipulate
-	        // the coordinates of the objects that use this vertex shader
-	        "uniform mat4 mvMatrix;" +
-	        "uniform mat4 pMatrix;" +
-	        "uniform mat3 nMatrix;" +
-	        "attribute vec3 vertex;" +
-	        "attribute vec3 normal;" +
-	        "attribute vec2 txcoord;" +
-	        "varying vec2 f_txcoord;" +
-	        "varying vec3 f_lightPos;" +
-	        "varying vec3 f_normal;" +
-	        "varying vec3 f_vertex;" +
-
-
-	        "void main() {" +
-	        "	gl_PointSize = 3.0;" +
-	        "	f_txcoord = txcoord;" +
-	        "	f_normal = normalize(nMatrix*normal);" +
-	        "	f_vertex = vec3(mvMatrix * vec4(vertex, 1.0));" +
-	        "	vec3 lightPos = vec3(mvMatrix * vec4(0.0,.5,0.0,1.0));" +
-	        "	f_lightPos = lightPos;" +
-
-	        // the matrix must be included as a modifier of gl_Position
-	        "  gl_Position = pMatrix * mvMatrix * vec4(vertex,1.0);" +
-	        "}";
-
-	    private final String fragmentShaderCode =
-	        "precision mediump float;" +
-	        "uniform sampler2D tex;" +
-	        "varying vec2 f_txcoord;" +
-	        "varying vec3 f_lightPos;" +
-	        "varying vec3 f_normal;" +
-	        "varying vec3 f_vertex;" +
-	        
-	        "void main() {" +
-	        "	vec3 L = normalize(f_lightPos - f_vertex); " +
-	        "	vec3 E = normalize(-f_vertex);" +
-	        "	vec3 R = normalize(-reflect(L,f_normal));" +
-	        "	vec3 ambient = vec3(.0,.0,.0);" +
-	        "	vec3 diffuse = vec3(.6) * max(dot(L, f_normal), 0.0);" +
-	        "	diffuse = clamp(diffuse, 0.0,1.0);" +
-	        "	vec3 specular = vec3(.15)*pow(max(dot(R,E),0.0), .3 * 30.0);" +
-	        "	specular = clamp(specular, 0.0,1.0);" +
-	        
-	        "	vec4 color = texture2D(tex, f_txcoord*.1);" +
-	        "	vec3 intensity = vec3(color) * diffuse;" +
-	        "	gl_FragColor = vec4(ambient+intensity+specular, 1.0);" +
-	        "}";
-	
-	private HashMap<ChunkLookup, Chunk> map;
-	private List<ChunkLookup> pending;
+	private HashMap<Pair<Integer,Integer>, Chunk> map;
+	private List<Pair<Integer,Integer>> pending;
+	private Queue<Pair<Integer,Integer>> active;
 	private DataFetcher fetcher;
 	private Shader shader;
 	
 	public World(DataFetcher df, Shader s) {
-		map = new HashMap<ChunkLookup, Chunk>();
-		pending = new LinkedList<ChunkLookup>();
+		map = new HashMap<Pair<Integer,Integer>, Chunk>();
+		active = new LinkedList<Pair<Integer,Integer>>();
+		pending = new LinkedList<Pair<Integer,Integer>>();
 		fetcher = df;
 		shader = s;
-		shader = new Shader(vertexShaderCode, fragmentShaderCode);
 	}
 
 	public void draw(){
@@ -100,17 +52,21 @@ public class World {
 		
 	}
 	public void loadAround(int x, int z){
-		ChunkLookup cl = new ChunkLookup(x,z);
+		Pair<Integer, Integer> cl = new Pair<Integer, Integer>(x,z);
 		
 		for (int i = -1; i < 2; i++){
 			for (int j = -1; j < 2; j++){
-				cl = new ChunkLookup(x+i,z+j);
+				cl = new Pair<Integer, Integer>(x+i,z+j);
 				if (map.containsKey(cl)){
 					continue;
 				}
-				fetcher.pushChunkRequest(cl.x, cl.z);
-				Log.d("World", "Requested " +  Integer.toString(cl.x) + "/" + Integer.toString(cl.z) + " from datafetcher");
+				if (pending.contains(cl)){
+					continue;
+				}
+				fetcher.pushChunkRequest(cl.first, cl.second);
+				Log.d("World", "Requested " +  Integer.toString(cl.first) + "/" + Integer.toString(cl.second) + " from datafetcher");
 				pending.add(cl);
+				
 			}
 		}
 	}
@@ -123,12 +79,12 @@ public class World {
 	
 	private void checkForPending(){
 		for (int i = 0; i < pending.size(); i++){
-			ChunkLookup cl = pending.get(i);
-			TaskStatus status = fetcher.getChunkStatus(cl.x, cl.z);
+			Pair<Integer, Integer> cl = pending.get(i);
+			TaskStatus status = fetcher.getChunkStatus(cl.first, cl.second);
 			if (status==TaskStatus.DONE){
 				
 				
-				float data[] = fetcher.getChunkData(cl.x, cl.z);
+				float data[] = fetcher.getChunkData(cl.first, cl.second);
 				int num_indices = data.length/8;
 				int indices[] = new int[num_indices];
 				for (int j = 0; j < num_indices; j++){
@@ -136,16 +92,22 @@ public class World {
 				}
 				
 				Chunk c = new Chunk(data, indices, shader.getProgram());
-				c.x = cl.x;
-				c.z = cl.z;
+				c.x = cl.first;
+				c.z = cl.second;
 				map.put(cl, c);
+				if (active.size() > 36){
+					Chunk chunk = map.remove(active.remove());
+					chunk.clear();
+				}
+				active.add(cl);
 				
 				pending.remove(i);
+				
 				Log.d("World", "Loaded " +  Integer.toString(c.x) + "/" + Integer.toString(c.z) + " into chunk");
 				Log.d("World", Integer.toString(pending.size()) + " pending left");
 			}
 			else if (status == TaskStatus.NOSUCHCHUNK){
-				Log.d("World", "Looks like the fetcher dropped " + Integer.toString(cl.x) + "/" + Integer.toString(cl.z));
+				Log.d("World", "Looks like the fetcher dropped " + Integer.toString(cl.first) + "/" + Integer.toString(cl.second));
 				pending.remove(i);
 			}
 			

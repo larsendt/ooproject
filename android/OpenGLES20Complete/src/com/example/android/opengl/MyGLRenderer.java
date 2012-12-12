@@ -52,57 +52,153 @@ import android.util.Log;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public static final String TAG = "OO";
-    private Shader shader;
-    private VBO vbo;
-    private boolean m_hasChunk = false;
-    DataFetcher m_dataFetcher;
+    
+    
+    private Shader meshShader;
+    private Light lightball;
+    private DataFetcher m_dataFetcher;
+    private Camera m_camera;
 
-    private String vertexShaderCode;
-    private String fragmentShaderCode;
+    private int texture1;
+    private int texture2;
+    private int texture3;
+    private int texture4;
 
-    private float[] pMatrix = new float[16];
-    private float[] mvMatrix = new float[16];
-    private float[] nMatrix = new float[9];
-    private float[] nInvertMatrix = new float[16];
-    private float[] nInvertTransposeMatrix = new float[16];
-    private float[] tmpMatrix = new float[16];
-
-    private Stack<float[]> projectionStack = new Stack<float[]>();
-    private Stack<float[]> modelviewStack = new Stack<float[]>();
-
-    private int texture;
-
-    // Declare as volatile because we are updating it from another thread
-    public volatile float mxAngle;
-    public volatile float myAngle;
-    public volatile float mY = 1;
+    private float m_xpos;
+    private float m_zpos;
+    private float m_y = 2.0f;
 
     public volatile int view;
     
     private World w;
+    
+    float pos;
 
 
     private Context mContext;
 
     public void setContext(Context context){
-
         mContext = context;
+    }
+
+    public void moveUp() {
+        m_y += 0.3;
+        m_camera.setHeight(m_y);
+    }
+
+    public void moveDown() {
+        m_y -= 0.3;
+        m_camera.setHeight(m_y);
+    }
+
+    public void drag(float dx, float dy) {
+        if(view == 1) {
+            m_xpos += dx;
+            m_zpos += dy;
+            m_camera.move(dx, dy);
+        }
+        else {
+            m_camera.rotate(dx, dy);
+        }
+    }
+
+    public void nextView() {
+        view = (view+1) % 2;
     }
 
     public void initGL(){
     	
     	GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        IntBuffer ib = IntBuffer.allocate(1);
-        GLES20.glGenTextures(1, ib);
+        
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
+        texture1 = loadBitmap("rock.bmp");
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        texture2 = loadBitmap("grass.bmp");
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
+        texture3 = loadBitmap("sand.bmp");
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
+        texture4 = loadBitmap("snow.bmp");
+    }
+    
+    public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        view = 1;
+
+        meshShader = Shader.loadShaderFromResource(R.raw.terrain_vs, R.raw.terrain_fs, mContext);
+
+        lightball = new Light(mContext);
+
+        m_dataFetcher = OpenGLES20Complete.m_dataFetcher;
+
+        m_camera = new Camera();
+        m_camera.setHeight(m_y);
+        
+        Matrix.setIdentityM(GLState.pMatrix, 0);
+        Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
+
+        initGL();
+
+        w = new World(m_dataFetcher, meshShader);
+        w.loadAround(0, 0);
+        
+        pos = 0;
+    }
+
+    public void onDrawFrame(GL10 unused) {
+    	
+    	w.loadAround((int)Math.floor(m_camera.m_x), (int)Math.floor(m_camera.m_y));
+    	w.update();
+    	
+        // Draw background color
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        m_camera.doTransformation();
+        lightball.update();
+        lightball.draw();
+        meshShader.useProgram();
+
+        float[] lightPos = lightball.getMVPos();
+        meshShader.setUniform3f("lightPos", lightPos[0], lightPos[1], lightPos[2]);
+        
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture1);
+        
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture2);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture3);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture4);
+        
+        meshShader.setUniform1i("tex1", 0);
+        meshShader.setUniform1i("tex2", 1);
+        meshShader.setUniform1i("tex3", 2);
+        meshShader.setUniform1i("tex4", 3);
+        
+        w.draw();
+
+        GLState.popMVMatrix();
+    }
+
+    public void onSurfaceChanged(GL10 unused, int width, int height) {
+        GLES20.glViewport(0, 0, width, height);
+        float ratio = (float) width / height;
+        Matrix.setIdentityM(GLState.pMatrix, 0);
+        Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, ratio, .1f,100.0f);
+    }
+
+    public int loadBitmap(String resourceName){
+    	IntBuffer ib = IntBuffer.allocate(1);
+        GLES20.glGenTextures(1, ib);
+        
         checkGlError("gen texture");
 
-        
-        texture = ib.get();
+        int textureHandle = ib.get();
 
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle);
 
         checkGlError("bind texture");
 
@@ -111,9 +207,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         Bitmap myBitmap;
         try {
-            myBitmap = BitmapFactory.decodeStream( mContext.getResources().getAssets().open("rock.bmp"));
+            myBitmap = BitmapFactory.decodeStream( mContext.getResources().getAssets().open(resourceName));
             if (myBitmap == null){
-                Log.d(TAG, "ASDF");
+                Log.d(TAG, "Bitmap wut");
             }
         } catch (IOException e) {
             // farts
@@ -130,143 +226,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         checkGlError("TexImage");
         
-    	
+        return textureHandle;
     }
     
-    public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-
-        // Set the background frame color
-
-        Log.d(TAG, "==============\nStarting glstuff");
-
-        view = 1;
-
-        
-
-        try {
-            Resources res = mContext.getResources();
-            InputStream in = res.openRawResource(R.raw.vshader);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] tmpbuf = new byte[8192];
-            int bytesRead;
-
-            while((bytesRead = in.read(tmpbuf)) != -1) {
-                out.write(tmpbuf, 0, bytesRead);
-            }
-
-            vertexShaderCode = out.toString("US-ASCII");
-            Log.d(MyGLRenderer.TAG, vertexShaderCode);
-
-            in = res.openRawResource(R.raw.fshader);
-            out = new ByteArrayOutputStream();
-
-            Log.d(MyGLRenderer.TAG, "================");
-
-            while((bytesRead = in.read(tmpbuf)) != -1) {
-                out.write(tmpbuf, 0, bytesRead);
-            }
-
-            fragmentShaderCode = out.toString("US-ASCII");
-            //Log.d(MyGLRenderer.TAG, fragmentShaderCode);
-
-
-        } catch(Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to load shaders");
-        }
-
-        shader = new Shader(vertexShaderCode, fragmentShaderCode);
-
-        vbo = new VBO(shader.getProgram());
-
-        //m_dataFetcher = new AsyncDataFetcher();
-        //m_dataFetcher.execute("http://larsendt.com:1234/?x=0&z=0&compression=yes");
-        
-        m_dataFetcher = new DataFetcher();
-        
-        Matrix.setIdentityM(pMatrix, 0);
-        Matrix.perspectiveM(pMatrix, 0, 60.0f, 1.0f, 1f,100.0f);
-
-        initGL();
-        w = new World(m_dataFetcher, shader);
-        w.loadAround(0, 0);
-    }
-
-    public void onDrawFrame(GL10 unused) {
-
-        /*if(m_dataFetcher.getChunkStatus(0,0) == TaskStatus.DONE && !m_hasChunk ) {
-
-            int SIZE_OF_VERTEX_PACKAGE = 8;
-            float[] vertex_data = m_dataFetcher.getChunkData(0,0);
-
-            int num_indices = vertex_data.length / SIZE_OF_VERTEX_PACKAGE;
-            int[] index_data = new int[num_indices];
-
-            for(int i = 0; i < index_data.length; i++) {
-                index_data[i] = i;
-            }
-
-            vbo.setBuffers(vertex_data, index_data);
-            MyGLRenderer.checkGlError("vbo setBuffers");
-            m_hasChunk = true;
-            Log.d(MyGLRenderer.TAG, "Vertex buffer complete");
-        }*/
-
-    	w.update();
-    	
-        // Draw background color
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-        GLState.setMVIdentity();
-
-        GLState.pushMVMatrix();
-
-
-        if (view == 1){
-
-            GLState.translate(0,0,-mY);
-            GLState.rotate(mxAngle, 1f, 0, 0);
-            GLState.rotate(myAngle, 0,1f,0);
-            GLState.translate(-.5f,0,-.5f);
-        }
-
-        else if (view == 0){
-
-
-            GLState.rotate(mxAngle, 1f, 0, 0);
-            GLState.rotate(myAngle, 0,1f,0);
-            GLState.translate(-.5f,-mY,-.5f);
-            
-        }
-
-
-        shader.useProgram();
-
-        
-
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture);
-
-        checkGlError("bind texture");
-
-
-        checkGlError("active texture");
-
-        
-        w.draw();
-
-        GLState.popMVMatrix();
-    }
-
-    public void onSurfaceChanged(GL10 unused, int width, int height) {
-        GLES20.glViewport(0, 0, width, height);
-        float ratio = (float) width / height;
-        Matrix.setIdentityM(GLState.pMatrix, 0);
-        Matrix.perspectiveM(GLState.pMatrix, 0, 60.0f, ratio, .1f,100.0f);
-    }
-
-
-
     /**
      * Utility method for debugging OpenGL calls. Provide the name of the call
      * just after making it:

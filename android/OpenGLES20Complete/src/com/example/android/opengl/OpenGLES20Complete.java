@@ -17,14 +17,18 @@
 package com.example.android.opengl;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.TextView;
 
 public class OpenGLES20Complete extends Activity {
 
     private MyGLSurfaceView mGLView;
+    
+    public static final DataFetcher m_dataFetcher = new DataFetcher();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,9 +41,23 @@ public class OpenGLES20Complete extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         mGLView = (MyGLSurfaceView) findViewById(R.id.glsurface);
+        
         if (mGLView == null){
         	Log.d("OO", "Surface grabbed from the layout was null");
         }
+        
+        
+        Intent intent = getIntent();
+        String serverName = intent.getStringExtra("com.example.android.opengl.serverName");
+        Log.d("OO", serverName);
+
+        TextView t = (TextView) findViewById(R.id.textView1);
+        
+        String str = "Connected to " + serverName;
+        
+        t.setText(str.toCharArray(), 0, str.length());
+        
+        m_dataFetcher.setServerName(serverName);
         //addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
     

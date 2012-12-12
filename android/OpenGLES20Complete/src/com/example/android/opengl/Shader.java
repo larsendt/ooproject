@@ -1,7 +1,12 @@
 package com.example.android.opengl;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 public class Shader {
 	
@@ -31,6 +36,40 @@ public class Shader {
             throw new RuntimeException("Program link error:" + GLES20.glGetProgramInfoLog(program));
         }
 	}
+
+    public static Shader loadShaderFromResource(int vxresource, int fsresource, Context context){
+        String vertexShaderCode;
+        String fragmentShaderCode;
+        try {
+            Resources res = context.getResources();
+            InputStream in = res.openRawResource(vxresource);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] tmpbuf = new byte[8192];
+            int bytesRead;
+
+            while((bytesRead = in.read(tmpbuf)) != -1) {
+                out.write(tmpbuf, 0, bytesRead);
+            }
+
+            vertexShaderCode = out.toString("US-ASCII");
+
+            in = res.openRawResource(fsresource);
+            out = new ByteArrayOutputStream();
+
+            while((bytesRead = in.read(tmpbuf)) != -1) {
+                out.write(tmpbuf, 0, bytesRead);
+            }
+
+            fragmentShaderCode = out.toString("US-ASCII");
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load shaders");
+        }
+
+        return new Shader(vertexShaderCode, fragmentShaderCode);
+
+    }
 	
 	public int getProgram()
 	{
