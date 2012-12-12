@@ -33,6 +33,15 @@
         android:text="@string/server_help"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="@string/terrain_help"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
     <EditText
         android:id="@+id/editText1"
         android:layout_width="wrap_content"
@@ -46,15 +55,6 @@
 
         <requestFocus />
     </EditText>
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/button1"
-        android:layout_below="@+id/editText1"
-        android:text="@string/terrain_help"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
         android:id="@+id/editText2"
