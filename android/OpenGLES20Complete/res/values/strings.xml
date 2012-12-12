@@ -33,5 +33,10 @@
     <string name="terrain_help">TERRAIN TYPE</string>
     <string name="terrain_hint">Type</string>
     <string name="terrain_default">mountains</string>
+    <string-array name="terrain_type_array">
+        <item>mountains</item>
+        <item>plains</item>
+        <item>oceans</item>
+    </string-array>
 
 </resources>

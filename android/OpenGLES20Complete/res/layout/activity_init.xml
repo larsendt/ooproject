@@ -56,14 +56,13 @@
         <requestFocus />
     </EditText>
 
-    <EditText
-        android:id="@+id/editText2"
+    <Spinner
+        android:id="@+id/terrainSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView3"
         android:layout_centerHorizontal="true"
         android:ems="10"
-        android:hint="@string/terrain_hint"
-        android:text="@string/terrain_default" />
+        android:hint="@string/terrain_hint"/>
 
 </RelativeLayout>
