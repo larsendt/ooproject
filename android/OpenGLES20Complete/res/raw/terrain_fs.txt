@@ -1,4 +1,4 @@
-precision mediump float;
+precision highp float;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 varying vec2 f_txcoord;
@@ -18,10 +18,8 @@ void main()
     
     vec4 color1 = texture2D(tex1, f_txcoord*2.0);
     vec4 color2 = texture2D(tex2, f_txcoord);
-    
-    
+
     float dotprod = dot( normalize(vec3(.0,1.0,.0)),  f_worldspacen );
-    
 	float mixval = clamp((1.0-dotprod)*2.0,0.0,1.0);
     
     vec3 specular = vec3(mixval*.4)*pow(max(dot(R,E),0.0), mixval*6.0);
