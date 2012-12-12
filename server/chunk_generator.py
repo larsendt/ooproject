@@ -7,13 +7,14 @@ import config
 DELTA = 0.0001
 
 class VertexGenerator(object):
-    def __init__(self):
+    def __init__(self, start_octave, end_octave, octave_step, base_height, height_range):
         self.conf = config.Config("terrain_server.conf")
-        self.start_octave = self.conf.get("perlin_start_octave", 0, True)
-        self.end_octave = self.conf.get("perlin_end_octave", 3, True)
-        self.octave_step = self.conf.get("perlin_octave_step", 1, True)
-        self.height = self.conf.get("perlin_height", 0.25, True)
         self.delta = self.conf.get("perlin_normal_delta", 1e-6, True)
+        self.start_octave = start_octave
+        self.end_octave = end_octave
+        self.octave_step = octave_step
+        self.base_height = base_height
+        self.height_range = height_range
         self.p = perlin.SimplexNoise()
 
     def vert_and_norm(self, x, z, xoff, zoff):
@@ -40,24 +41,50 @@ class VertexGenerator(object):
         for i in range(start_octave, end_octave, octave_step):
             mul = 0.5 * i
             v += self.p.noise2(x * (2 ** mul), y * (2 ** mul)) / (2 ** mul)
-        return v*self.height
-
+        return (v * self.height_range) + (self.base_height + 1.0)
 
 class ChunkGenerator(object):
     def __init__(self):
         self.conf = config.Config("terrain_server.conf")
         self.size = self.conf.get("chunk_size", 1, True)
         self.resolution = self.conf.get("chunk_resolution", 50, True)
-        self.vx_gen = VertexGenerator() 
+        self.mountains_params = self.conf.get("mountains", {"octave_start":0, "octave_end":6, "octave_step":1, "base_height":-0.5, "height_range":0.3}, True)
+        self.plains_params = self.conf.get("plains", {"octave_start":-2, "octave_end":0, "octave_step":1, "base_height":-1.45, "height_range":0.1}, True)
+        self.desert_params = self.conf.get("desert", {"octave_start":0, "octave_end":2, "octave_step":1, "base_height":-1.75, "height_range":0.1}, True)
+        self.oceans_params = self.conf.get("oceans", {"octave_start":0, "octave_end":4, "octave_step":1, "base_height":-2.0, "height_range":0.1}, True)
+
+        self.vx_gen = VertexGenerator(self.mountains_params["octave_start"], 
+                self.mountains_params["octave_end"], 
+                self.mountains_params["octave_step"], 
+                self.mountains_params["base_height"],
+                self.mountains_params["height_range"]) 
 
     def chunk_size(self):
         return self.size
+
+    def set_terrain_type(self, terrain_type):
+        if terrain_type == "mountains":
+            params = self.mountains_params
+        elif terrain_type == "plains":
+            params = self.plains_params
+        elif terrain_type == "oceans":
+            params = self.oceans_params
+        elif terrain_type == "desert":
+            params = self.desert_params
+        else:
+            params = self.mountains_params
+
+        self.vx_gen.start_octave = params["octave_start"]
+        self.vx_gen.end_octave = params["octave_end"]
+        self.vx_gen.octave_step = params["octave_step"]
+        self.vx_gen.base_height = params["base_height"]
+        self.vx_gen.height_range = params["height_range"]
 
     def chunk_res(self):
         return self.resolution
 
     def cache_attrs(self):
-        return self.size, self.resolution, self.vx_gen.start_octave, self.vx_gen.end_octave, self.vx_gen.height, self.vx_gen.delta
+        return self.size, self.resolution, self.vx_gen.start_octave, self.vx_gen.end_octave, self.vx_gen.base_height, self.vx_gen.height_range, self.vx_gen.delta
 
     def generate_chunk(self, x, z):
         vertices = []

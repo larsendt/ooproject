@@ -10,7 +10,8 @@ class Terrain(object):
         self.cg = chunk_generator.ChunkGenerator()
         self.cache = filecache.Cache("terrain_cache")
 
-    def get_response_for(self, x, y, compression):
+    def get_response_for(self, x, y, compression, terrain_type):
+        self.cg.set_terrain_type(terrain_type)
         cache_key = (x, y, compression) + self.cg.cache_attrs()
         if cache_key in self.cache:
             print "chunk %s was cached" % str(cache_key)

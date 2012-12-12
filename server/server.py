@@ -16,7 +16,7 @@ class terrain_server(object):
 
     def GET(self):
         params = web.input()
-        
+
         try:
             x = int(params.x)
             z = int(params.z)
@@ -24,11 +24,19 @@ class terrain_server(object):
             return json.dumps({"type":"error", "error":"invalid coordinates given"})
 
         try:
+            terrain_type = params.terrain_type
+        except:
+            print "no terrain type specified, defaulting to mountains"
+            terrain_type = "mountains"
+
+        print terrain_type
+
+        try:
             compression = True if params.compression == "yes" else False
-        except AttributeError:
+        except:
             compression = False
 
-        return self.terrain.get_response_for(x, z, compression)
+        return self.terrain.get_response_for(x, z, compression, terrain_type)
 
 app = web.application(urls, globals())
 
