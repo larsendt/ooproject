@@ -27,7 +27,7 @@ void main()
     float dotprod = dot( normalize(vec3(.0,1.0,.0)),  f_worldspacen );
 	float mixval = clamp((1.0-dotprod)*2.0,0.0,1.0);
 
-    vec4 color = mix(color1, color2, mixval);
+    vec4 color = mix(color2, color1, mixval);
     if (f_worldspacev.y >0.5){
     
     	color = mix(color, color4, clamp(1.0/.2 * (f_worldspacev.y - .5), 0.0,1.0));
@@ -36,7 +36,7 @@ void main()
     }
     else if (f_worldspacev.y <-0.5){
     
-    	color = mix(color3, color, clamp(1.0/.2 *(f_worldspacev.y + .5), 0.0,1.0));
+    	color = mix(color, color3, clamp(1.0/.2 *abs(f_worldspacev.y + .5), 0.0,1.0));
     	mixval = 0.0;
     
     }
