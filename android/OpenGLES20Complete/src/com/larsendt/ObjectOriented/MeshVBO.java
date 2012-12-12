@@ -1,12 +1,11 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import android.opengl.GLES20;
-import android.util.Log;
 
-public class MeshVBO {
+public class MeshVBO extends VBO{
 
 	private int program;
     private int vbo_vertices;
@@ -27,7 +26,8 @@ public class MeshVBO {
     
     public MeshVBO(int shaderprogram)
     {
-    	MyGLRenderer.checkGlError("VBO start");
+    	super(shaderprogram);
+    	WorldRenderer.checkGlError("VBO start");
     	program = shaderprogram;
     	
     	String attribute_name = "vertex";
@@ -35,17 +35,17 @@ public class MeshVBO {
     	att_vertex = GLES20.glGetAttribLocation(program, attribute_name);
     	if (att_vertex == -1){
     	}
-    	MyGLRenderer.checkGlError("vertex glGetAttribLocation");
+    	WorldRenderer.checkGlError("vertex glGetAttribLocation");
 
         att_normal = GLES20.glGetAttribLocation(program, "normal");
         if(att_normal == -1) {
         }
-        MyGLRenderer.checkGlError("normal glGetAttribLocation");
+        WorldRenderer.checkGlError("normal glGetAttribLocation");
 
         att_txcoord = GLES20.glGetAttribLocation(program, "txcoord");
         if(att_txcoord == -1) {
         }
-        MyGLRenderer.checkGlError("txcoord glGetAttribLocation");
+        WorldRenderer.checkGlError("txcoord glGetAttribLocation");
         
         IntBuffer ib = IntBuffer.allocate(2);
     	GLES20.glGenBuffers(2, ib);
@@ -53,13 +53,14 @@ public class MeshVBO {
     	
     	ibo_elements = ib.get();
     	
-    	MyGLRenderer.checkGlError("glGenBuffers");
+    	WorldRenderer.checkGlError("glGenBuffers");
     	
     	
     	
     }
     
-    public void setBuffers(float vertices[], int indices[])
+    @Override
+	public void setBuffers(float vertices[], int indices[])
     {
     	FloatBuffer fb = FloatBuffer.allocate(vertices.length);
     	
@@ -71,7 +72,7 @@ public class MeshVBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
-    	MyGLRenderer.checkGlError("glBindBuffer");
+    	WorldRenderer.checkGlError("glBindBuffer");
     	
     	
     	GLES20.glBufferData(
@@ -81,7 +82,7 @@ public class MeshVBO {
     			GLES20.GL_STATIC_DRAW
     	);
     	
-    	MyGLRenderer.checkGlError("glBufferData");
+    	WorldRenderer.checkGlError("glBufferData");
     	
     	IntBuffer ib = IntBuffer.allocate(indices.length);
     	
@@ -91,7 +92,7 @@ public class MeshVBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
     	
-    	MyGLRenderer.checkGlError("glBindBuffer");
+    	WorldRenderer.checkGlError("glBindBuffer");
     	
     	GLES20.glBufferData(
     			GLES20.GL_ELEMENT_ARRAY_BUFFER,
@@ -102,7 +103,7 @@ public class MeshVBO {
     	
     	elements_length = indices.length;
     	
-    	MyGLRenderer.checkGlError("glBufferData");
+    	WorldRenderer.checkGlError("glBufferData");
     	
     }
     
@@ -111,9 +112,10 @@ public class MeshVBO {
     	GLES20.glDeleteBuffers(2, buffers, 0);
     }
     
-    public void draw()
+    @Override
+	public void draw()
     {
-    	MyGLRenderer.checkGlError("draw start");
+    	WorldRenderer.checkGlError("draw start");
     	
     	GLES20.glEnableVertexAttribArray(att_vertex);
         GLES20.glEnableVertexAttribArray(att_normal);
@@ -122,7 +124,7 @@ public class MeshVBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
-    	MyGLRenderer.checkGlError("vbo_vertex glBindBuffer");
+    	WorldRenderer.checkGlError("vbo_vertex glBindBuffer");
     	
     	GLES20.glVertexAttribPointer(
     				att_vertex,
@@ -135,7 +137,7 @@ public class MeshVBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
-    	MyGLRenderer.checkGlError("att_vertex glVertexAttribPointer");
+    	WorldRenderer.checkGlError("att_vertex glVertexAttribPointer");
 
         GLES20.glVertexAttribPointer(
                 att_normal,
@@ -148,7 +150,7 @@ public class MeshVBO {
         
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
         
-        MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
+        WorldRenderer.checkGlError("att_normal glVertexAttribPointer");
         
         GLES20.glVertexAttribPointer(
                 att_txcoord,
@@ -158,11 +160,11 @@ public class MeshVBO {
                 BYTES_IN_PACKAGE,
                 6*FLOAT_BYTE_SIZE
         );
-        MyGLRenderer.checkGlError("att_normal glVertexAttribPointer");
+        WorldRenderer.checkGlError("att_normal glVertexAttribPointer");
 
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
-    	MyGLRenderer.checkGlError("glBindBuffer");
+    	WorldRenderer.checkGlError("glBindBuffer");
     	
     	
     	
@@ -172,12 +174,12 @@ public class MeshVBO {
     			GLES20.GL_UNSIGNED_INT, 
     			0
     	);
-    	MyGLRenderer.checkGlError("glDrawElements");
+    	WorldRenderer.checkGlError("glDrawElements");
     	
     	GLES20.glDisableVertexAttribArray(att_vertex);
     	GLES20.glDisableVertexAttribArray(att_normal);
     	GLES20.glDisableVertexAttribArray(att_txcoord);
-    	MyGLRenderer.checkGlError("glDisableVertexAttribArray");
+    	WorldRenderer.checkGlError("glDisableVertexAttribArray");
     	
     }
     

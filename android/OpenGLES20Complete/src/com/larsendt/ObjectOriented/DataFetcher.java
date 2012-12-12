@@ -1,11 +1,10 @@
-package com.example.android.opengl;
-
-import android.os.AsyncTask;
-import android.util.Log;
-import android.util.Pair;
+package com.larsendt.ObjectOriented;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import android.os.AsyncTask;
+import android.util.Pair;
 
 /**
  * User: dane

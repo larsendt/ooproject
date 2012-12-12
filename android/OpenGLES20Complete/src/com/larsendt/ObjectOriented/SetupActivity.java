@@ -1,13 +1,15 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
-import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
 
-public class InitActivity extends Activity {
+import com.larsendt.ObjectOriented.R;
+
+public class SetupActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -22,7 +24,7 @@ public class InitActivity extends Activity {
     }
     
     public void startStreaming(View view){
-    	Intent intent = new Intent(this, OpenGLES20Complete.class);
+    	Intent intent = new Intent(this, DisplayActivity.class);
     	EditText editText = (EditText) findViewById(R.id.editText1);
     	String message = editText.getText().toString();//"http://larsendt.com:1234";
     	intent.putExtra("com.example.android.opengl.serverName", message);

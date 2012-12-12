@@ -48,4 +48,3 @@ void main()
     vec3 intensity = vec3(color) * diffuse;
     gl_FragColor = vec4(ambient+intensity+specular, 1.0);
 }
-

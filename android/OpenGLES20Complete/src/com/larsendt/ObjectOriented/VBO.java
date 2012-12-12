@@ -1,10 +1,9 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import android.opengl.GLES20;
-import android.util.Log;
 
 public class VBO {
 
@@ -36,7 +35,7 @@ public class VBO {
     	
     	ibo_elements = ib.get();
     	
-    	MyGLRenderer.checkGlError("glGenBuffers");
+    	WorldRenderer.checkGlError("glGenBuffers");
     	
     	
     	
@@ -54,7 +53,7 @@ public class VBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
-    	MyGLRenderer.checkGlError("glBindBuffer");
+    	WorldRenderer.checkGlError("glBindBuffer");
     	
     	
     	GLES20.glBufferData(
@@ -64,7 +63,7 @@ public class VBO {
     			GLES20.GL_STATIC_DRAW
     	);
     	
-    	MyGLRenderer.checkGlError("glBufferData");
+    	WorldRenderer.checkGlError("glBufferData");
     	
     	IntBuffer ib = IntBuffer.allocate(indices.length);
     	
@@ -74,7 +73,7 @@ public class VBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
     	
-    	MyGLRenderer.checkGlError("glBindBuffer");
+    	WorldRenderer.checkGlError("glBindBuffer");
     	
     	GLES20.glBufferData(
     			GLES20.GL_ELEMENT_ARRAY_BUFFER,
@@ -85,7 +84,7 @@ public class VBO {
     	
     	elements_length = indices.length;
     	
-    	MyGLRenderer.checkGlError("glBufferData");
+    	WorldRenderer.checkGlError("glBufferData");
     	
     }
     
@@ -96,7 +95,7 @@ public class VBO {
     	
     	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_vertices);
     	
-    	MyGLRenderer.checkGlError("vbo_vertex glBindBuffer");
+    	WorldRenderer.checkGlError("vbo_vertex glBindBuffer");
     	
     	GLES20.glVertexAttribPointer(
     				att_vertex,
@@ -111,7 +110,7 @@ public class VBO {
 
     	
     	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
-    	MyGLRenderer.checkGlError("glBindBuffer");
+    	WorldRenderer.checkGlError("glBindBuffer");
     	
     	GLES20.glDrawElements(
     			GLES20.GL_TRIANGLES,
@@ -119,10 +118,10 @@ public class VBO {
     			GLES20.GL_UNSIGNED_INT, 
     			0
     	);
-    	MyGLRenderer.checkGlError("glDrawElements");
+    	WorldRenderer.checkGlError("glDrawElements");
     	
     	GLES20.glDisableVertexAttribArray(att_vertex);
-    	MyGLRenderer.checkGlError("glDisableVertexAttribArray");
+    	WorldRenderer.checkGlError("glDisableVertexAttribArray");
     	
     }
     

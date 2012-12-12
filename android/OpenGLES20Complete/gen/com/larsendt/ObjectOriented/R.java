@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
 public final class R {
     public static final class attr {

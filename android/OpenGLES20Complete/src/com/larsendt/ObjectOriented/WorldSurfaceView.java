@@ -1,25 +1,24 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 
-class MyGLSurfaceView extends GLSurfaceView {
+class WorldSurfaceView extends GLSurfaceView {
 
-    private final MyGLRenderer mRenderer;
+    private final WorldRenderer mRenderer;
 
     public Context myContext;
     
-    public MyGLSurfaceView(Context context, AttributeSet attrs) {
+    public WorldSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         myContext = context;
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
 
         // Set the Renderer for drawing on the GLSurfaceView
-        mRenderer = new MyGLRenderer();
+        mRenderer = new WorldRenderer();
         setRenderer(mRenderer);
         mRenderer.setContext(context);
         

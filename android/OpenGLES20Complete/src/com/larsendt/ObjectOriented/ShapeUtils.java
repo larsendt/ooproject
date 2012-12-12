@@ -1,4 +1,4 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
 public class ShapeUtils {
 

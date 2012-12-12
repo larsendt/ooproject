@@ -1,18 +1,16 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Queue;
-import java.util.Vector;
 
 import android.util.Log;
 import android.util.Pair;
 
-import com.example.android.opengl.DataFetcher.TaskStatus;
+import com.larsendt.ObjectOriented.DataFetcher.TaskStatus;
 
 public class World {
 

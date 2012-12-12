@@ -1,8 +1,10 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
 
 import android.content.Context;
 import android.opengl.Matrix;
+
+import com.larsendt.ObjectOriented.R;
 
 public class Light {
     private float[] m_pos;

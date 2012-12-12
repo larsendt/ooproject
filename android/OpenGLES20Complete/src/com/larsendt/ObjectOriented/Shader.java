@@ -1,12 +1,12 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.util.Log;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 
 public class Shader {
 	
@@ -30,7 +30,7 @@ public class Shader {
         int[] status = new int[1];
         GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, status, 0);
         if(status[0] == GLES20.GL_TRUE) {
-            Log.d(MyGLRenderer.TAG, "Linked shader program (id:" + program + ")");
+            Log.d(WorldRenderer.TAG, "Linked shader program (id:" + program + ")");
         }
         else {
             throw new RuntimeException("Program link error:" + GLES20.glGetProgramInfoLog(program));
@@ -108,7 +108,7 @@ public class Shader {
 	{
 		int location = GLES20.glGetUniformLocation(program, name);
 		if (location == -1){
-			Log.d(MyGLRenderer.TAG, "Location for " + name + " is invalid");
+			Log.d(WorldRenderer.TAG, "Location for " + name + " is invalid");
 		}
 		
 		GLES20.glUniformMatrix3fv(location, 1, false, values, 0);
@@ -118,7 +118,7 @@ public class Shader {
 	{
 		int location = GLES20.glGetUniformLocation(program, name);
 		if (location == -1){
-			Log.d(MyGLRenderer.TAG, "Location for " + name + " is invalid");
+			Log.d(WorldRenderer.TAG, "Location for " + name + " is invalid");
 		}
 		
 		GLES20.glUniformMatrix4fv(location, 1, false, values, 0);
@@ -126,11 +126,11 @@ public class Shader {
 	
 	public void setMatrices(float[] mvMatrix, float[] pMatrix)
 	{
-		MyGLRenderer.checkGlError("Start of setmatrices");
+		WorldRenderer.checkGlError("Start of setmatrices");
 		setUniformMatrix4fv("mvMatrix", mvMatrix);
-		MyGLRenderer.checkGlError("mvMatrix setmatrix");
+		WorldRenderer.checkGlError("mvMatrix setmatrix");
 		setUniformMatrix4fv("pMatrix", pMatrix);
-		MyGLRenderer.checkGlError("pMatrix setmatrix");
+		WorldRenderer.checkGlError("pMatrix setmatrix");
 		
 		
 	}
@@ -138,11 +138,11 @@ public class Shader {
 	public void setMatrices(float[] mvMatrix, float[] pMatrix, float[] nMatrix){
 		
 		setUniformMatrix4fv("mvMatrix", mvMatrix);
-		MyGLRenderer.checkGlError("mvMatrix setmatrix");
+		WorldRenderer.checkGlError("mvMatrix setmatrix");
 		setUniformMatrix4fv("pMatrix", pMatrix);
-		MyGLRenderer.checkGlError("pMatrix setmatrix");
+		WorldRenderer.checkGlError("pMatrix setmatrix");
 		setUniformMatrix3fv("nMatrix", nMatrix);
-		MyGLRenderer.checkGlError("nMatrix setmatrix");
+		WorldRenderer.checkGlError("nMatrix setmatrix");
 	}
 	
 	
@@ -163,10 +163,10 @@ public class Shader {
             GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
             if(status[0] == GLES20.GL_TRUE) {
                 if(type == GLES20.GL_VERTEX_SHADER) {
-                    Log.d(MyGLRenderer.TAG, "Compiled vertex shader (id:" + shader +")");
+                    Log.d(WorldRenderer.TAG, "Compiled vertex shader (id:" + shader +")");
                 }
                 else {
-                    Log.d(MyGLRenderer.TAG, "Compiled fragment shader (id:" + shader + ")");
+                    Log.d(WorldRenderer.TAG, "Compiled fragment shader (id:" + shader + ")");
                 }
             }
             else {
