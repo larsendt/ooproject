@@ -15,7 +15,7 @@ import android.util.Pair;
 public class DataFetcher {
     private Map<Pair<Integer, Integer>, AsyncDataFetcher> m_fetcherMap;
     private String m_url;
-    private final String chunkRequest = "/?x=%d&z=%d&compression=yes";
+    private final String chunkRequest = "/?x=%d&z=%d&compression=yes&terrain_type=plains";
     
     public enum TaskStatus {
         NOSUCHCHUNK,
