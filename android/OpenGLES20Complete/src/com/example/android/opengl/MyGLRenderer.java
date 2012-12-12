@@ -114,8 +114,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
         texture1 = loadBitmap("rock.bmp");
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
         texture2 = loadBitmap("grass.bmp");
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
         texture3 = loadBitmap("sand.bmp");
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
         texture4 = loadBitmap("snow.bmp");
     }
     
@@ -158,13 +161,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float[] lightPos = lightball.getMVPos();
         meshShader.setUniform3f("lightPos", lightPos[0], lightPos[1], lightPos[2]);
         
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture1);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture2);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture1);
+        
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture2);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture3);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture4);
         
         meshShader.setUniform1i("tex1", 0);
         meshShader.setUniform1i("tex2", 1);
+        meshShader.setUniform1i("tex3", 2);
+        meshShader.setUniform1i("tex4", 3);
         
         w.draw();
 
