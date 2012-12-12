@@ -1,6 +1,5 @@
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
-import android.util.Log;
 
 public class Camera {
     private float m_height;

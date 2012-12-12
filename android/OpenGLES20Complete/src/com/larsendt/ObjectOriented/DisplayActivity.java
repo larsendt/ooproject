@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -24,9 +24,11 @@ import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
-public class OpenGLES20Complete extends Activity {
+import com.larsendt.ObjectOriented.R;
 
-    private MyGLSurfaceView mGLView;
+public class DisplayActivity extends Activity {
+
+    private WorldSurfaceView mGLView;
     
     public static final DataFetcher m_dataFetcher = new DataFetcher();
 
@@ -40,7 +42,7 @@ public class OpenGLES20Complete extends Activity {
         //mGLView = new MyGLSurfaceView(this);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
-        mGLView = (MyGLSurfaceView) findViewById(R.id.glsurface);
+        mGLView = (WorldSurfaceView) findViewById(R.id.glsurface);
         
         if (mGLView == null){
         	Log.d("OO", "Surface grabbed from the layout was null");
@@ -48,7 +50,8 @@ public class OpenGLES20Complete extends Activity {
         
         
         Intent intent = getIntent();
-        String serverName = intent.getStringExtra("com.example.android.opengl.serverName");
+        String serverName = intent.getStringExtra("com.larsendt.ObjectOriented.serverName");
+        String terrainType = intent.getStringExtra("com.larsendt.ObjectOriented.terrainType");
         Log.d("OO", serverName);
 
         TextView t = (TextView) findViewById(R.id.textView1);
@@ -58,6 +61,7 @@ public class OpenGLES20Complete extends Activity {
         t.setText(str.toCharArray(), 0, str.length());
         
         m_dataFetcher.setServerName(serverName);
+        m_dataFetcher.setTerrainType(terrainType);
         //addContentView(mGLView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
     

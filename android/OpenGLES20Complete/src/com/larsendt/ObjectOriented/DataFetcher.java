@@ -1,11 +1,10 @@
-package com.example.android.opengl;
-
-import android.os.AsyncTask;
-import android.util.Log;
-import android.util.Pair;
+package com.larsendt.ObjectOriented;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import android.os.AsyncTask;
+import android.util.Pair;
 
 /**
  * User: dane
@@ -16,7 +15,8 @@ import java.util.Map;
 public class DataFetcher {
     private Map<Pair<Integer, Integer>, AsyncDataFetcher> m_fetcherMap;
     private String m_url;
-    private final String chunkRequest = "/?x=%d&z=%d&compression=yes";
+    private String m_type;
+    private final String chunkRequest = "/?x=%d&z=%d&compression=yes&terrain_type=%s";
     
     public enum TaskStatus {
         NOSUCHCHUNK,
@@ -35,7 +35,7 @@ public class DataFetcher {
         if(!m_fetcherMap.containsKey(key)) {
             AsyncDataFetcher df = new AsyncDataFetcher();
             m_fetcherMap.put(key, df);
-            df.execute(String.format(m_url + chunkRequest, x, z));
+            df.execute(String.format(m_url + chunkRequest, x, z, m_type));
         }
     }
 
@@ -76,5 +76,9 @@ public class DataFetcher {
     
     public void setServerName(String newUrl){
     	m_url = newUrl;
+    }
+    
+    public void setTerrainType(String terrain){
+    	m_type = terrain;
     }
 }

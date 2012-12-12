@@ -14,29 +14,15 @@
  * limitations under the License.
  */
 
-package com.example.android.opengl;
+package com.larsendt.ObjectOriented;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
-import java.util.Arrays;
-import java.util.InputMismatchException;
-import java.util.Stack;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import com.example.android.opengl.DataFetcher.TaskStatus;
-
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -45,11 +31,12 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
-import android.os.AsyncTask;
 import android.util.Log;
 
+import com.larsendt.ObjectOriented.R;
 
-public class MyGLRenderer implements GLSurfaceView.Renderer {
+
+public class WorldRenderer implements GLSurfaceView.Renderer {
 
     public static final String TAG = "OO";
     
@@ -129,7 +116,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         lightball = new Light(mContext);
 
-        m_dataFetcher = OpenGLES20Complete.m_dataFetcher;
+        m_dataFetcher = DisplayActivity.m_dataFetcher;
 
         m_camera = new Camera();
         m_camera.setHeight(m_y);

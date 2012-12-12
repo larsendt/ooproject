@@ -23,7 +23,7 @@
             android:id="@+id/glsurface"
             android:layout_width="fill_parent"
             android:layout_height="875dp"
-            class="com.example.android.opengl.MyGLSurfaceView"
+            class="com.larsendt.ObjectOriented.WorldSurfaceView"
             android:fadingEdge="vertical"
             android:padding="10dip"
             android:scrollbars="vertical" />
