@@ -61,6 +61,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private int texture1;
     private int texture2;
+    private int texture3;
+    private int texture4;
 
     private float m_xpos;
     private float m_zpos;
@@ -113,6 +115,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         texture1 = loadBitmap("rock.bmp");
         texture2 = loadBitmap("grass.bmp");
+        texture3 = loadBitmap("sand.bmp");
+        texture4 = loadBitmap("snow.bmp");
     }
     
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {

@@ -67,10 +67,6 @@ public class World {
 				Log.d("World", "Requested " +  Integer.toString(cl.first) + "/" + Integer.toString(cl.second) + " from datafetcher");
 				pending.add(cl);
 				
-				if (active.size() > 18){
-					Chunk c = map.remove(active.remove());
-					c.clear();
-				}
 			}
 		}
 	}
@@ -99,6 +95,10 @@ public class World {
 				c.x = cl.first;
 				c.z = cl.second;
 				map.put(cl, c);
+				if (active.size() > 36){
+					Chunk chunk = map.remove(active.remove());
+					chunk.clear();
+				}
 				active.add(cl);
 				
 				pending.remove(i);
