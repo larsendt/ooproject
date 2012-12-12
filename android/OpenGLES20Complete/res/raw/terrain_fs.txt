@@ -19,8 +19,8 @@ void main()
     vec3 diffuse = vec3(0.8) * max(dot(L, f_normal), 0.0);
     diffuse = clamp(diffuse, 0.0,1.0);
     
-    vec4 color1 = texture2D(tex1, f_txcoord*2.0);
-    vec4 color2 = texture2D(tex2, f_txcoord*2.0);
+    vec4 color1 = texture2D(tex1, f_txcoord);
+    vec4 color2 = texture2D(tex2, f_txcoord);
     vec4 color3 = texture2D(tex3, f_txcoord * 2.0);
     vec4 color4 = texture2D(tex4, f_txcoord);
 
