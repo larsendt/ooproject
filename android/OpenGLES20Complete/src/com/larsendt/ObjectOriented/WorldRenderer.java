@@ -95,7 +95,7 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
 
     public void initGL(){
     	
-    	GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    	GLES20.glClearColor(0.5f, 0.5f, 0.7f, 1.0f);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
