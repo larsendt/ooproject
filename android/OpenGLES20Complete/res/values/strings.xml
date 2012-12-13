@@ -36,7 +36,6 @@
     <string-array name="terrain_type_array">
         <item>mountains</item>
         <item>plains</item>
-        <item>oceans</item>
         <item>desert</item>
     </string-array>
 
